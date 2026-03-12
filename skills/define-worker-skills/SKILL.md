@@ -289,7 +289,7 @@ Every worker MUST produce a structured handoff in the following format at the en
   },
   "discoveredIssues": [
     {
-      "severity": "non_blocking",
+      "severity": "low",
       "description": "ESLint warning in utils.ts:42 — unused import",
       "suggestedFix": "Remove the unused import statement"
     }
@@ -308,14 +308,14 @@ Every worker MUST produce a structured handoff in the following format at the en
 | `verification.interactiveChecks` | No | For UI/browser work, describe what you clicked and saw. |
 | `tests.added` | Yes | Array of test files added, with test case names and what they verify. Empty array if no tests. |
 | `tests.coverage` | Yes | Summary of test coverage. |
-| `discoveredIssues` | Yes | Array of issues found. Empty array if none. Severity: `blocking` or `non_blocking`. |
+| `discoveredIssues` | Yes | Array of issues found. Empty array if none. Severity: `high`, `medium`, or `low`. |
 
 ### Handoff Rules
 
 1. **Be specific in observations.** Don't write "tests passed" — write "All 42 tests passed in 3.2s with 0 failures."
 2. **Report actual exit codes.** Run commands and capture exit codes. Don't assume success.
 3. **Don't fabricate results.** Only report commands you actually ran and results you actually observed.
-4. **Flag blockers immediately.** If something blocks your work, set severity to `blocking` and describe the issue clearly.
+4. **Flag blockers immediately.** If something blocks your work, set severity to `high` and describe the issue clearly.
 
 ---
 

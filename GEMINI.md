@@ -217,10 +217,10 @@ paused ────────────────→ orchestrator_turn    
 3. **worker_running → handoff_review**: Triggered when the worker subagent completes and returns a structured JSON handoff containing `salientSummary`, `whatWasImplemented`, `whatWasLeftUndone`, `verification`, `tests`, and `discoveredIssues`.
 
 4. **handoff_review → orchestrator_turn**: Triggered after the orchestrator applies the decision tree:
-   - **Option A**: High/critical issues → create a follow-up feature.
+   - **Option A**: High-severity issues → create a follow-up feature.
    - **Option B**: Failure → reset feature to `pending` with updated description.
    - **Option C**: Partial completion → update the feature description for next attempt.
-   - **Option D**: Low/medium issues → create a feature in a `misc-*` milestone (max 5 per misc milestone).
+   - **Option D**: Medium- or low-severity issues → create a feature in a `misc-*` milestone (max 5 per misc milestone).
 
 5. **orchestrator_turn → completed**: Triggered when all features have status `completed` or `cancelled`, and all non-cancelled milestones have their validators passed (or overridden). The `sealedMilestones` array must include all milestones with implementation features.
 

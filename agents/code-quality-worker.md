@@ -74,8 +74,9 @@ Analyze the codebase or specific files identified in your feature assignment:
    - **Testing** — Missing tests, inadequate coverage, flaky test patterns.
 
 3. **Prioritize findings** by severity:
-   - **blocking** — Must be fixed; prevents correct operation or poses security risk.
-   - **non_blocking** — Should be fixed but does not block functionality.
+   - **high** — Must be fixed; prevents correct operation or poses security risk.
+   - **medium** — Should be fixed soon but does not block functionality.
+   - **low** — Minor improvement or style issue. Can be deferred.
 
 ### 2.2 Apply Fixes
 
@@ -154,7 +155,7 @@ Your final output **MUST** be a structured JSON handoff block. Output it as the 
   },
   "discoveredIssues": [
     {
-      "severity": "blocking",
+      "severity": "high",
       "description": "Description of the issue found",
       "suggestedFix": "How to fix it (optional)"
     }
@@ -169,12 +170,13 @@ Your final output **MUST** be a structured JSON handoff block. Output it as the 
 - **`whatWasLeftUndone`**: Empty string if complete. Otherwise, list issues found but not fixed and explain why.
 - **`verification.commandsRun`**: Every verification command run, with exact command, exit code, and specific observation.
 - **`tests.added`**: Any tests added as part of the quality improvement. Omit if none.
-- **`discoveredIssues`**: All quality issues found, whether fixed or not. Use `blocking` for critical issues and `non_blocking` for improvements. Prefix with "Pre-existing:" for issues that existed before your review.
+- **`discoveredIssues`**: All quality issues found, whether fixed or not. Use `high` for critical issues, `medium` for issues that should be addressed soon, and `low` for minor improvements. Prefix with "Pre-existing:" for issues that existed before your review.
 
 ### Severity Levels
 
-- **`blocking`** — Critical issue that must be addressed before the milestone can proceed.
-- **`non_blocking`** — Quality improvement that should be addressed but does not block progress.
+- **`high`** — Critical issue that must be addressed before the milestone can proceed.
+- **`medium`** — Should be addressed soon but does not block progress.
+- **`low`** — Minor improvement or style issue. Can be deferred.
 
 ---
 

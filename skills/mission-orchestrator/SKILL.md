@@ -264,7 +264,7 @@ The worker's response contains a structured JSON handoff block. Parse it to extr
     "coverage": "Summary of test coverage"
   },
   "discoveredIssues": [
-    {"severity": "blocking|non_blocking", "description": "...", "suggestedFix": "..."}
+    {"severity": "high|medium|low", "description": "...", "suggestedFix": "..."}
   ]
 }
 ```
@@ -308,12 +308,12 @@ Log the completion event to `progress_log.jsonl`:
 
 Evaluate the handoff in this order:
 
-### Option A: Follow-Up Feature for High/Critical Issues
+### Option A: Follow-Up Feature for High-Severity Issues
 
-**Trigger:** The `discoveredIssues` array contains one or more issues with `severity: "blocking"`.
+**Trigger:** The `discoveredIssues` array contains one or more issues with `severity: "high"`.
 
 **Action:**
-1. Create a new follow-up feature for each blocking issue (or group related issues into one feature).
+1. Create a new follow-up feature for each high-severity issue (or group related issues into one feature).
 2. Insert the new feature(s) at the **top** of the `features` array in `features.json` (highest priority).
 3. Set the follow-up feature's fields:
    - `id`: `"fix-<original-feature-id>-<issue-index>"` (e.g., `fix-user-auth-001`)
@@ -350,7 +350,7 @@ Evaluate the handoff in this order:
 
 ### Option C: Update Description for Partial Completion
 
-**Trigger:** The worker reports partial success — `whatWasLeftUndone` is non-empty but `verification.commandsRun` shows some passing results, AND there are no blocking `discoveredIssues`.
+**Trigger:** The worker reports partial success — `whatWasLeftUndone` is non-empty but `verification.commandsRun` shows some passing results, AND there are no `high` severity `discoveredIssues`.
 
 **Action:**
 1. Update the feature's `description` in `features.json` to reflect only the remaining work:
@@ -364,14 +364,14 @@ Evaluate the handoff in this order:
    {"timestamp": "<ISO 8601>", "event": "feature_partial", "featureId": "<id>", "implemented": "<whatWasImplemented>", "remaining": "<whatWasLeftUndone>"}
    ```
 
-### Option D: Misc Milestone for Low/Medium Issues
+### Option D: Misc Milestone for Medium/Low Issues
 
-**Trigger:** The `discoveredIssues` array contains issues with `severity: "non_blocking"` only (no blocking issues), AND the worker reports success (empty `whatWasLeftUndone`, passing verification).
+**Trigger:** The `discoveredIssues` array contains only `medium` or `low` severity issues (no `high` issues), AND the worker reports success (empty `whatWasLeftUndone`, passing verification).
 
 **Action:**
 1. Mark the original feature as `"completed"` in `features.json`.
 2. Increment `completedFeatures` in `state.json`.
-3. For each `non_blocking` issue, create a new feature in a `misc-*` milestone:
+3. For each `medium` or `low` severity issue, create a new feature in a `misc-*` milestone:
    - Find the current misc milestone (`misc-1`, `misc-2`, etc.).
    - If the current misc milestone has 5 features already, create the next one (`misc-2`, `misc-3`, etc.).
    - Set the new feature's fields:
@@ -472,14 +472,19 @@ After updating the feature that just completed:
 
 If all implementation features in the milestone are done AND the milestone is NOT already in `milestonesWithValidationPlanned`:
 
-1. **Create scrutiny validator feature:**
+1. Check whether the milestone has at least one implementation feature with `status: "completed"`.
+   - If **none** of the implementation features were completed (that is, they are all `cancelled`), **skip validator injection entirely**.
+   - Log a milestone completion event noting that validation was skipped because the milestone has no completed implementation work.
+   - Do **not** add the milestone to `milestonesWithValidationPlanned`.
+
+2. **Create scrutiny validator feature:**
    ```json
    {
      "id": "scrutiny-validator-<milestone>",
      "description": "Scrutiny validation for milestone \"<milestone>\". Runs test suite, typecheck, and lint. Reviews each completed feature's code changes. Synthesizes findings. Always returns to orchestrator.",
      "skillName": "scrutiny-validator",
      "milestone": "<milestone>",
-     "preconditions": ["All implementation features for milestone \"<milestone>\" are complete"],
+     "preconditions": [],
      "expectedBehavior": [
        "Validators pass (test, typecheck, lint)",
        "Review completed for each feature",
@@ -491,7 +496,7 @@ If all implementation features in the milestone are done AND the milestone is NO
    }
    ```
 
-2. **Create user-testing validator feature:**
+3. **Create user-testing validator feature:**
    ```json
    {
      "id": "user-testing-validator-<milestone>",
@@ -513,14 +518,14 @@ If all implementation features in the milestone are done AND the milestone is NO
 
    **Important:** The user-testing validator depends on the scrutiny validator (`preconditions` includes `scrutiny-validator-<milestone>`). This ensures code quality gates pass before behavioral testing.
 
-3. **Add both features** to the `features` array in `features.json`.
+4. **Add both features** to the `features` array in `features.json`.
 
-4. **Update state.json:**
+5. **Update state.json:**
    - Add the milestone name to `milestonesWithValidationPlanned` array.
    - Increment `totalFeatures` by 2.
    - Update `updatedAt`.
 
-5. **Log the injection:**
+6. **Log the injection:**
    ```json
    {"timestamp": "<ISO 8601>", "event": "milestone_completed", "milestone": "<milestone>"}
    {"timestamp": "<ISO 8601>", "event": "validation_injected", "milestone": "<milestone>", "features": ["scrutiny-validator-<milestone>", "user-testing-validator-<milestone>"]}
@@ -662,7 +667,7 @@ Features can be cancelled when they are no longer needed. Cancellation is a **te
 
 ## Misc Milestones
 
-Non-blocking issues discovered during implementation are tracked in `misc-*` milestones.
+Medium- and low-severity issues discovered during implementation are tracked in `misc-*` milestones.
 
 ### Capacity Limit
 

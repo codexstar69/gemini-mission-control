@@ -9,13 +9,13 @@ Follow these steps:
    If no missions exist, tell the user: "No missions found. Use /mission-start to create one first."
 
 2. Read the mission's state.json to determine the current state. Check the "state" field:
-   - If the state is "orchestrator_turn": proceed to step 3 — this is the normal starting state.
-   - If the state is "worker_running" or "handoff_review": proceed to step 3 — the mission-orchestrator skill will perform crash recovery automatically.
+   - If the state is "orchestrator_turn": proceed to step 3 — this is the only valid starting state for /mission-run.
    - If the state is "planning": display error: "This mission is still in planning state. Run /mission-plan first to complete planning before running."
+   - If the state is "worker_running" or "handoff_review": display error: "This mission is mid-run recovery state. Re-enter through the orchestrator skill's crash recovery flow, not /mission-run."
    - If the state is "paused": display error: "This mission is paused. Run /mission-resume to resume execution first."
    - If the state is "completed": display error: "This mission is already completed. No further work to do."
    - If the state is "failed": display error: "This mission has failed. Check the progress log for details."
-   Only proceed to step 3 if the state is "orchestrator_turn", "worker_running", or "handoff_review".
+   Only proceed to step 3 if the state is "orchestrator_turn".
 
 3. Read the mission's working directory from state.json. You will need both:
    - The mission directory path: ~/.gemini-mc/missions/mis_<id>/

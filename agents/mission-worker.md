@@ -162,7 +162,7 @@ Your final output **MUST** be a structured JSON handoff block. This is how the o
   },
   "discoveredIssues": [
     {
-      "severity": "blocking",
+      "severity": "high",
       "description": "Description of the issue found",
       "suggestedFix": "How to fix it (optional)"
     }
@@ -179,12 +179,13 @@ Your final output **MUST** be a structured JSON handoff block. This is how the o
 - **`verification.interactiveChecks`**: Any manual/interactive verification performed. Omit if none.
 - **`tests.added`**: Every test file and test case you created. Omit if no tests were applicable.
 - **`tests.coverage`**: Brief summary of test coverage (e.g., "Unit tests for user registration API endpoint covering success, validation errors, and duplicate email cases").
-- **`discoveredIssues`**: Issues found during implementation that are outside your feature scope. Use severity `blocking` for issues that prevent the feature from working, or `non_blocking` for issues that should be addressed later. Prefix with "Pre-existing:" for issues that existed before your work.
+- **`discoveredIssues`**: Issues found during implementation that are outside your feature scope. Use severity `high` for issues that prevent the feature from working, `medium` for issues that should be addressed soon, or `low` for minor improvements. Prefix with "Pre-existing:" for issues that existed before your work.
 
 ### Severity Levels
 
-- **`blocking`** — Prevents the feature from working correctly. Requires immediate attention.
-- **`non_blocking`** — Should be addressed but does not block the current feature.
+- **`high`** — Prevents the feature from working correctly or poses a security risk. Requires immediate attention.
+- **`medium`** — Should be addressed soon but does not block the current feature.
+- **`low`** — Minor improvement or style issue. Can be deferred.
 
 ---
 
