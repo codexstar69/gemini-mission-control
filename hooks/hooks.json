@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "load-active-mission-context",
+            "type": "command",
+            "command": "scripts/session-context.sh",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}
