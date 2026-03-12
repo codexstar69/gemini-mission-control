@@ -2,29 +2,31 @@ description = "Display the current status of a mission"
 prompt = """
 The user wants to check mission status. Arguments: {{args}}
 
+Do NOT reference or use any external CLI tool or script. Use only read_file and list_directory tools directly.
+
 Follow these steps:
 
-1. If the user provided a mission ID in {{args}}, use that ID. Otherwise, find the most recently updated mission by reading the updatedAt field from every state.json and picking the latest one (do NOT use directory modification times).
+1. Determine which mission to display:
 
-2. To find the most recent mission (if no ID given):
-   a. List all directories matching ~/.gemini-mc/missions/mis_*/
-   b. For each directory, read state.json and extract the updatedAt field
-   c. Compare updatedAt timestamps (ISO-8601 format) and select the mission with the latest updatedAt value
-   d. If no mission directories exist, tell the user "No missions found. Use /mission-start to create one."
+   a. If {{args}} contains a mission ID, read the state file directly:
+      - Try read_file on ~/.gemini-mc/missions/mis_{{args}}/state.json
+      - If that fails, try read_file on ~/.gemini-mc/missions/{{args}}/state.json
+      - If neither exists, tell the user "Mission not found: {{args}}"
 
-3. If a mission ID was provided via {{args}}, look for it at:
-   ~/.gemini-mc/missions/{{args}}/state.json
-   or ~/.gemini-mc/missions/mis_{{args}}/state.json
-   If neither exists, tell the user that mission was not found.
+   b. If {{args}} is empty (no arguments provided), find the most recent mission:
+      - Use list_directory to list ~/.gemini-mc/missions/
+      - For each subdirectory that starts with "mis_", use read_file to read <dir>/state.json
+      - Parse the updatedAt field (ISO-8601 format) from each state.json
+      - Select the mission with the latest updatedAt value
+      - If no mission directories exist, tell the user "No missions found. Use /mission-start to create one."
 
-4. Read the state.json file from the selected mission directory.
+2. Once you have the state.json content, display the mission status in this format:
 
-5. Display the mission status in a clear format:
-   - Mission ID: (missionId field)
-   - State: (state field)
-   - Progress: (completedFeatures)/(totalFeatures) features completed
-   - Working Directory: (workingDirectory field)
-   - Last Updated: (updatedAt field)
+   Mission ID: <missionId>
+   State: <state>
+   Progress: <completedFeatures>/<totalFeatures> features completed
+   Working Directory: <workingDirectory>
+   Last Updated: <updatedAt>
 
-If the state.json file is malformed or missing, report the error clearly.
+If state.json is malformed or missing required fields, report the error clearly.
 """
