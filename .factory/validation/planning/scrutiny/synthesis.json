@@ -1,6 +1,6 @@
 {
   "milestone": "planning",
-  "round": 1,
+  "round": 2,
   "status": "fail",
   "validatorsRun": {
     "test": {
@@ -15,45 +15,39 @@
     },
     "lint": {
       "passed": true,
-      "command": "gemini extensions uninstall gemini-mission-control && gemini extensions link /Users/codex/Projects/gemini-mission-control-extension",
+      "command": "gemini extensions uninstall gemini-mission-control >/dev/null 2>&1 || true && gemini extensions link /Users/codex/Projects/gemini-mission-control-extension",
       "exitCode": 0
     }
   },
   "reviewsSummary": {
-    "total": 3,
-    "passed": 2,
+    "total": 1,
+    "passed": 0,
     "failed": 1,
     "failedFeatures": [
-      "define-worker-skills-skill"
+      "fix-define-worker-skills-agent-path"
     ]
   },
   "blockingIssues": [
     {
-      "featureId": "define-worker-skills-skill",
+      "featureId": "fix-define-worker-skills-agent-path",
       "severity": "blocking",
-      "description": "skills/define-worker-skills/SKILL.md instructs planners to create worker definitions under .mission/skills/<worker-name>/SKILL.md instead of agents/*.md, which conflicts with this mission's architecture and validation contract for mission-worker/code-quality-worker agent definitions."
+      "description": "The fix corrected the agent-definition path in skills/define-worker-skills/SKILL.md, but it still documents `discoveredIssues` severity `suggestion` instead of restricting the schema to this mission's `blocking` and `non_blocking` convention."
     }
   ],
   "appliedUpdates": [],
   "suggestedGuidanceUpdates": [
     {
-      "target": "AGENTS.md",
-      "suggestion": "Document where project-local helper skills live and how workers should use them when the runtime Skill tool cannot activate a repo-local .factory/skills entry.",
-      "evidence": "All three planning reviews noted worker attempts to invoke extension-builder via the Skill tool failed even though .factory/skills/extension-builder/SKILL.md exists in the repository.",
-      "isSystemic": true
-    },
-    {
       "target": "skills",
-      "suggestion": "Standardize guidance on where mission-specific worker definitions belong so planner/worker skills do not disagree between agents/*.md and .mission/skills/*/SKILL.md.",
-      "evidence": "The define-worker-skills review found GEMINI.md and architecture guidance pointing to agents/*.md while skills/define-worker-skills/SKILL.md directed planners to .mission/skills/<worker-name>/SKILL.md.",
+      "suggestion": "Make skill-feedback guidance consistent: workers should not mark `followedProcedure: true` when they record a concrete deviation from required validation or skill-invocation steps.",
+      "evidence": "The original define-worker-skills implementation and its follow-up fix both recorded deviations in `skillFeedback.deviations` while still marking `followedProcedure: true` in their handoffs.",
       "isSystemic": true
     }
   ],
   "rejectedObservations": [
     {
-      "observation": "Repeated extension-builder skill activation failures across planning workers",
-      "reason": "Deduplicated into one systemic guidance update instead of recording the same runtime-discovery issue three times."
+      "observation": "The original path mismatch between agents/*.md and .mission/skills/*/SKILL.md",
+      "reason": "Rejected for this round because the rerun confirmed the fix commit corrected the worker-definition path; only the remaining severity-schema issue is still actionable."
     }
   ],
-  "previousRound": null
+  "previousRound": ".factory/validation/planning/scrutiny/synthesis.json (round 1 overwritten by round 2 synthesis; prior round status was fail for define-worker-skills-skill)"
 }

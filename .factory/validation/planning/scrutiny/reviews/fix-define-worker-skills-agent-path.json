@@ -1,0 +1,28 @@
+{
+  "featureId": "fix-define-worker-skills-agent-path",
+  "reviewedAt": "2026-03-12T22:39:06Z",
+  "commitId": "7b13dfe",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The fix commit resolves the original blocking path issue by updating the skill to direct planners to create worker agent definitions in `agents/<worker-name>.md`. However, the skill still allows `discoveredIssues` severity `suggestion`, so it does not fully satisfy the fix assignment from this review round, which also required aligning severity language with the mission's `blocking`/`non_blocking` convention.",
+    "issues": [
+      {
+        "file": "skills/define-worker-skills/SKILL.md",
+        "line": 311,
+        "severity": "blocking",
+        "description": "The handoff requirements still permit `discoveredIssues` severity `suggestion` instead of restricting severities to this mission's `blocking` and `non_blocking` convention. The planning fix request explicitly required updating this language along with the agent-path correction, so the fix is incomplete."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The fix worker again reported `followedProcedure: true` even though it deviated from baseline validation guidance because `.factory/services.yaml` has no `commands.test` entry and the worker substituted `gemini extensions link .`.",
+      "evidence": "Handoff /Users/codex/.factory/missions/9e5cdf43-7a7b-4e1b-b796-31b974feb42a/handoffs/2026-03-12T22-35-26-434Z__fix-define-worker-skills-agent-path__843b446e-e694-434c-9cdd-cdb42d3a8817.json marks `skillFeedback.followedProcedure` true while listing a deviation for step `1.3 Baseline Validation`."
+    }
+  ],
+  "addressesFailureFrom": "/Users/codex/Projects/gemini-mission-control-extension/.factory/validation/planning/scrutiny/reviews/define-worker-skills-skill.json",
+  "summary": "Reviewed the prior failed review and synthesis, the fix feature metadata, transcript skeleton, handoff, current skill file, and commit 7b13dfe. The original blocking path problem is fixed, but the requested severity-language cleanup was not made: `skills/define-worker-skills/SKILL.md` still documents `suggestion` as an allowed `discoveredIssues` severity. Because the fix does not fully satisfy the scoped assignment, this review remains a failure."
+}
