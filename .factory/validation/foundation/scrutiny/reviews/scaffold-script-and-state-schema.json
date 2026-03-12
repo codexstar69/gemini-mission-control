@@ -1,0 +1,40 @@
+{
+  "featureId": "scaffold-script-and-state-schema",
+  "reviewedAt": "2026-03-12T21:24:05.403182Z",
+  "commitId": "51da015",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature added both requested scripts and the scaffold script creates the required directory structure, but the implementation does not fully satisfy the state-schema requirements. In particular, the validator does not enforce the required ISO 8601 timestamp format, and the scaffold script writes unescaped shell input directly into JSON.",
+    "issues": [
+      {
+        "file": "scripts/validate-state.sh",
+        "line": 49,
+        "severity": "blocking",
+        "description": "The validator only checks that createdAt and updatedAt are strings, not that they are ISO 8601 timestamps. A state.json with arbitrary strings like \"yesterday\" would pass, so the script does not actually validate the timestamp schema required by the feature description."
+      },
+      {
+        "file": "scripts/validate-state.sh",
+        "line": 50,
+        "severity": "blocking",
+        "description": "updatedAt has the same problem as createdAt: the jq checks only enforce string type, not ISO 8601 format, so invalid timestamps are accepted despite the feature requirement."
+      },
+      {
+        "file": "scripts/scaffold-mission.sh",
+        "line": 25,
+        "severity": "blocking",
+        "description": "workingDirectory is interpolated directly into JSON without escaping. If the provided directory contains a double quote, backslash escape, or newline, the generated state.json becomes invalid or corrupted. The scaffold script therefore does not robustly generate valid JSON for arbitrary working_directory inputs."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The assigned feature declared skillName \"extension-builder\", but the worker could not invoke that skill and proceeded without it. This suggests a shared-state gap between the mission plan and the actually available skills/subagent environment.",
+      "evidence": "worker-transcripts.jsonl:50 shows `Tool Result\nError: Skill \"extension-builder\" not found`; the handoff skillFeedback also says the worker proceeded directly because the skill was not available, while the repository contains .factory/skills/extension-builder/SKILL.md."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed the feature handoff, transcript skeleton, skill file, mission guidance, and commit 51da015. The scaffold script creates the requested files, but the feature should not pass because validate-state.sh does not enforce ISO 8601 timestamps and scaffold-mission.sh writes unescaped input into JSON, which can produce invalid state.json content."
+}

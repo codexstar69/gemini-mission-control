@@ -1,0 +1,28 @@
+{
+  "featureId": "remaining-commands-toml",
+  "reviewedAt": "2026-03-13T00:00:00Z",
+  "commitId": "0bd1bd2",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "Commit 0bd1bd2 adds the six requested command TOML files and the files do satisfy the core product requirements: there are now nine command files total, each new file is valid TOML with description/prompt fields, mission-plan and mission-run reference the expected skills, pause/resume mention the required state transitions, export uses tar.gz, and override records justification. However, the worker's execution record is not fully trustworthy because it claims the extension-builder skill was unavailable even though the project-local skill file exists and documents this exact work.",
+    "issues": [
+      {
+        "file": "/Users/codex/.factory/missions/9e5cdf43-7a7b-4e1b-b796-31b974feb42a/handoffs/2026-03-12T21-10-43-333Z__remaining-commands-toml__5d778199-63bb-4253-9205-41c8c778bc07.json",
+        "line": 71,
+        "severity": "non_blocking",
+        "description": "The handoff says the worker could not invoke the extension-builder skill because it was not available, but the repository already contains /Users/codex/Projects/gemini-mission-control-extension/.factory/skills/extension-builder/SKILL.md. The feature output is correct, but this makes the recorded deviation inaccurate."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "Workers are still reporting project-local extension-builder as unavailable even though the skill file exists in .factory/skills. Either worker instructions for locating project-local skills are unclear, or the runtime does not expose those skills consistently.",
+      "evidence": "The project contains /Users/codex/Projects/gemini-mission-control-extension/.factory/skills/extension-builder/SKILL.md, while the reviewed handoff at lines 71-77 says the skill was not found and recommends registering/installing it before worker dispatch."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed the transcript skeleton, handoff, commit diff, command files, GEMINI.md, AGENTS.md, services.yaml, and the local extension-builder skill. The six TOML files themselves satisfy the feature requirements, but I marked the review failed because the execution record contains a material inaccuracy about skill availability, which lowers confidence in the worker's reported procedure even though the shipped files are correct."
+}

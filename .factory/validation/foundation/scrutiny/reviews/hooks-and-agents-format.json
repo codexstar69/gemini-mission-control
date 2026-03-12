@@ -1,0 +1,21 @@
+{
+  "featureId": "hooks-and-agents-format",
+  "reviewedAt": "2026-03-12T21:24:22.043012Z",
+  "commitId": "2151bf076ce6cab3c2fe1834051c8eb12fa4dc50",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The implementation satisfies the feature description. hooks/hooks.json uses the documented event-based SessionStart structure and points to an executable scripts/session-context.sh command. The script reads mission state from ~/.gemini-mc/missions, selects the most recently updated non-completed/non-failed mission, and prints mission context fields required for session startup. agents/.gitkeep remains present, and there were no agent .md files in agents/ to validate at this milestone.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The extension-builder skill's verification guidance does not match the mission environment guidance for shell script validation. The worker transcript shows an attempted shellcheck run even though mission guidance says shellcheck is not installed and bash -n should be used instead.",
+      "evidence": "Mission AGENTS.md:17 says shellcheck is not installed and bash -n should be used; extension-builder SKILL.md verification section only says to check executability and run gemini extensions link .; worker transcript for session 75c11214-7609-468e-bde4-4ac8130f89ac includes `which shellcheck && shellcheck ... || echo \"shellcheck not available, skipping\"`."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed the hooks-and-agents-format feature handoff, commit diff, transcript skeleton, and relevant project files. The feature passes review with no code issues; I recorded one shared-state skill mismatch around shell-script validation guidance."
+}

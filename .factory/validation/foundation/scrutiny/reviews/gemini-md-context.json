@@ -1,0 +1,21 @@
+{
+  "featureId": "gemini-md-context",
+  "reviewedAt": "2026-03-12T21:25:20.406953Z",
+  "commitId": "a5047c6",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "GEMINI.md satisfies the feature requirements: it exists at the project root, contains all seven required sections with substantive content, documents the required state file paths and JSON schemas, lists all nine commands and four agents plus three skills, defines the required mission states and transitions, and exceeds the minimum line count.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The feature metadata points workers to an `extension-builder` skill, but the skill actually lives under `.factory/skills/extension-builder/SKILL.md` rather than the project `skills/` directory the reviewer instructions assume. The worker first attempted to read `/Users/codex/Projects/gemini-mission-control-extension/skills/extension-builder/SKILL.md`, got ENOENT, and then skipped the skill despite it existing elsewhere. This layout mismatch should be documented so future workers know where project-specific build skills live.",
+      "evidence": "features.json:423 sets `skillName` to `extension-builder`; transcript skeleton shows a failed read of `/Users/codex/Projects/gemini-mission-control-extension/skills/extension-builder/SKILL.md`; actual file exists at `/Users/codex/Projects/gemini-mission-control-extension/.factory/skills/extension-builder/SKILL.md`."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed commit a5047c6 and the worker transcript for gemini-md-context. The implementation meets the feature description and VAL-FOUND-002 with no blocking or non-blocking code issues; one shared-state observation notes that the worker skill path is undocumented/misaligned with expectations."
+}

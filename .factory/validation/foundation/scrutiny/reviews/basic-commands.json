@@ -1,0 +1,28 @@
+{
+  "featureId": "basic-commands",
+  "reviewedAt": "2026-03-12T21:27:24.709299Z",
+  "commitId": "41ad4134d2d72eaa5eca962864a83226449b8ed0",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature added the three requested TOML command files and each file parses with the required description and prompt keys. However, mission-status does not reliably select the most recent mission when no mission ID is provided because its executable fallback step uses directory mtime rather than reading state.json updatedAt values, so the implementation does not fully satisfy the requested behavior.",
+    "issues": [
+      {
+        "file": "commands/mission-status.toml",
+        "line": 10,
+        "severity": "blocking",
+        "description": "When {{args}} is empty, the prompt tells the model to pick the most recent mission via `ls -td ~/.gemini-mc/missions/mis_*/ | head -1`. Directory mtimes do not reliably track state.json updates, so this can report the wrong mission instead of the one with the latest state.json updatedAt value required by the feature description."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The worker failed to invoke the project-local extension-builder skill even though it exists under .factory/skills/extension-builder/SKILL.md, then recorded a deviation claiming the skill was not found. The mission/shared-state docs do not make it clear enough how workers should discover and invoke project-local skills versus installed Factory skills.",
+      "evidence": "Transcript skeleton for workerSessionId 9efc6b9e-f8d2-43f2-a774-eccced797f57 shows `Skill { \"skill\": \"extension-builder\" }` returned `Error: Skill \"extension-builder\" not found`, while /Users/codex/Projects/gemini-mission-control-extension/.factory/skills/extension-builder/SKILL.md exists. The handoff.skillFeedback deviation repeats this assumption."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed the basic-commands feature via feature metadata, worker transcript skeleton, handoff, commit diff, and the three TOML files. The files exist and parse, but the feature should fail review because mission-status can select the wrong mission when no ID is provided due to sorting by directory mtime instead of state.json updatedAt."
+}

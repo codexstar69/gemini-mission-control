@@ -1,0 +1,39 @@
+{
+  "featureId": "extension-manifest-and-structure",
+  "reviewedAt": "2026-03-12T21:20:36.956635Z",
+  "commitId": "38e72b2",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The committed changes correctly add the required manifest, placeholder directories, and .gitignore in the new extension project, but the worker handoff misreports the availability of the extension-builder skill and overstates the exact gemini extensions link command that succeeded.",
+    "issues": [
+      {
+        "file": "/Users/codex/.factory/missions/9e5cdf43-7a7b-4e1b-b796-31b974feb42a/handoffs/2026-03-12T21-01-52-229Z__extension-manifest-and-structure__4a7cb9a0-3aeb-40b2-b9c8-938083be4e52.json",
+        "line": 49,
+        "severity": "non_blocking",
+        "description": "The handoff claims the extension-builder skill was unavailable, but /Users/codex/Projects/gemini-mission-control-extension/.factory/skills/extension-builder/SKILL.md exists. This makes the reported deviation inaccurate and weakens trust in the execution record."
+      },
+      {
+        "file": "/Users/codex/.factory/missions/9e5cdf43-7a7b-4e1b-b796-31b974feb42a/handoffs/2026-03-12T21-01-52-229Z__extension-manifest-and-structure__4a7cb9a0-3aeb-40b2-b9c8-938083be4e52.json",
+        "line": 21,
+        "severity": "non_blocking",
+        "description": "The recorded verification command says `echo Y | gemini extensions link .`, but the transcript shows the plain link command first failed because the extension was already installed and the worker then uninstalled/re-linked before validating. The feature outcome is correct, but the verification record is not an exact account of what was required to achieve exit code 0."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The worker reported that the extension-builder skill was not available even though the project contains .factory/skills/extension-builder/SKILL.md. Either the worker procedure for locating project-local skills is unclear, or the execution environment does not surface them consistently.",
+      "evidence": "Project file exists at /Users/codex/Projects/gemini-mission-control-extension/.factory/skills/extension-builder/SKILL.md, while the handoff deviation in 2026-03-12T21-01-52-229Z__extension-manifest-and-structure__4a7cb9a0-3aeb-40b2-b9c8-938083be4e52.json states the skill was not found/available."
+    },
+    {
+      "area": "services",
+      "observation": "services.yaml exposes only primitive validators and no single project-level validation command, which contributed to the worker skipping baseline validation and inventing a suggested `test` command for a declarative project.",
+      "evidence": "/Users/codex/Projects/gemini-mission-control-extension/.factory/services.yaml only defines validate-json, validate-extension, validate-toml, and validate-shell; AGENTS.md separately explains that this project has no bun/typecheck workflow."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed transcript, handoff, commit 38e72b2, and current repo state for extension-manifest-and-structure. The implementation itself satisfies the feature requirements in /Users/codex/Projects/gemini-mission-control-extension, but the worker handoff contains inaccurate procedural and verification claims, so this review fails on execution-record fidelity rather than product behavior."
+}

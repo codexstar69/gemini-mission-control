@@ -13,7 +13,7 @@ Environment variables, external dependencies, and setup notes.
 - `experimental.enableAgents: true` in `~/.gemini/settings.json`
 - Python 3 (for TOML validation)
 - `jq` (for JSON validation)
-- `shellcheck` (optional, for shell script validation)
+- `shellcheck` is not installed in this environment; use `bash -n` for shell script syntax validation instead
 
 ## State Directory
 
