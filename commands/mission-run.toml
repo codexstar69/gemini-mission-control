@@ -8,24 +8,30 @@ Follow these steps:
    `ls -td ~/.gemini-mc/missions/mis_*/ 2>/dev/null | head -1`
    If no missions exist, tell the user: "No missions found. Use /mission-start to create one first."
 
-2. Read the mission's state.json to verify the mission is in the "orchestrator_turn" state.
-   If the state is "planning", tell the user: "This mission is still in planning. Run /mission-plan first to complete planning."
-   If the state is "paused", tell the user: "This mission is paused. Run /mission-resume to resume execution."
-   If the state is "completed", tell the user: "This mission is already completed."
-   If the state is "failed", tell the user: "This mission has failed. Check the progress log for details."
-   Only proceed if the state is "orchestrator_turn".
+2. Read the mission's state.json to determine the current state. Check the "state" field:
+   - If the state is "orchestrator_turn": proceed to step 3 — this is the normal starting state.
+   - If the state is "worker_running" or "handoff_review": proceed to step 3 — the mission-orchestrator skill will perform crash recovery automatically.
+   - If the state is "planning": display error: "This mission is still in planning state. Run /mission-plan first to complete planning before running."
+   - If the state is "paused": display error: "This mission is paused. Run /mission-resume to resume execution first."
+   - If the state is "completed": display error: "This mission is already completed. No further work to do."
+   - If the state is "failed": display error: "This mission has failed. Check the progress log for details."
+   Only proceed to step 3 if the state is "orchestrator_turn", "worker_running", or "handoff_review".
 
-3. Activate the mission-orchestrator skill. The skill drives the autonomous run loop:
-   - Read state and evaluate the feature DAG for ready features
-   - Construct enriched worker prompts with context from .mission/ files
-   - Dispatch worker subagents for each ready feature
-   - Parse structured JSON handoffs from workers
-   - Apply the decision tree (Options A/B/C/D) based on outcomes
-   - Update state, log progress, check milestone completion
-   - Auto-inject validators when milestones complete
-   - Loop until all features are done or intervention is needed
+3. Read the mission's working directory from state.json. You will need both:
+   - The mission directory path: ~/.gemini-mc/missions/mis_<id>/
+   - The working directory path from state.json's workingDirectory field
 
-4. The orchestrator will manage the full execution lifecycle autonomously.
+4. Use activate_skill to load the mission-orchestrator skill. This will provide the complete autonomous run loop procedure:
+   - Step 1: Read state and perform crash recovery if needed
+   - Step 2: Evaluate the feature DAG for ready features
+   - Step 3: Construct enriched worker prompts with context from .mission/ files
+   - Step 4: Dispatch worker subagents for each ready feature
+   - Step 5: Parse structured JSON handoffs from workers
+   - Step 6: Apply the decision tree (Options A/B/C/D) based on outcomes
+   - Step 7: Update state, log progress, write inter-agent messages
+   - Step 8: Check milestone completion, inject validators, loop or complete
 
-Begin by reading the mission state and then activate the mission-orchestrator skill to start the run loop.
+5. Follow the mission-orchestrator skill's instructions. The skill will manage the full execution lifecycle autonomously — dispatching workers, reviewing handoffs, updating state, and completing milestones — until all features are done or intervention is needed.
+
+Begin by reading the mission state from the mission directory, then call activate_skill to load the mission-orchestrator skill and start the run loop.
 """
