@@ -20,13 +20,22 @@ Follow these steps:
       - Select the mission with the latest updatedAt value
       - If no mission directories exist, tell the user "No missions found. Use /mission-start to create one."
 
-2. Once you have the state.json content, display the mission status in this format:
+2. Once you have the state.json content, also read features.json from the same mission directory to determine the current milestone:
+   - Use read_file to read features.json from the same mission directory (e.g. ~/.gemini-mc/missions/mis_<id>/features.json)
+   - Look through the "features" array and find the first feature object whose "status" field equals "pending"
+   - Extract that feature's "milestone" field — this is the current milestone
+   - If no features have status "pending" (all are completed or cancelled, or the array is empty), the current milestone is "all complete"
+
+3. Display the mission status in this exact format:
 
    Mission ID: <missionId>
    State: <state>
    Progress: <completedFeatures>/<totalFeatures> features completed
+   Current Milestone: <milestone>
    Working Directory: <workingDirectory>
    Last Updated: <updatedAt>
 
-If state.json is malformed or missing required fields, report the error clearly.
+   Where <milestone> is the current milestone derived from step 2 (either the milestone field of the first pending feature, or "all complete" if none are pending).
+
+If state.json or features.json is malformed or missing required fields, report the error clearly.
 """
