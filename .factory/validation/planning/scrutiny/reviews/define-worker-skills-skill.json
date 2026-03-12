@@ -1,0 +1,39 @@
+{
+  "featureId": "define-worker-skills-skill",
+  "reviewedAt": "2026-03-12T22:30:06Z",
+  "commitId": "0bc2a48",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The skill has valid frontmatter and broadly covers worker design topics, but it does not satisfy planning requirements because it instructs planners to create per-mission workers under `.mission/skills/.../SKILL.md` instead of agent definitions under `agents/*.md`. It also defines a `discoveredIssues` severity value (`suggestion`) that is inconsistent with the handoff conventions used elsewhere in this mission.",
+    "issues": [
+      {
+        "file": "skills/define-worker-skills/SKILL.md",
+        "line": 119,
+        "severity": "blocking",
+        "description": "The skill tells planners to place per-mission worker definitions in `.mission/skills/<worker-name>/SKILL.md` and reusable workers in `agents/<worker-name>.md`, but this mission's architecture and validation contract define worker agents as `agents/*.md`. That guidance would cause the planner to generate the wrong artifact type and location for mission-worker/code-quality-worker definitions required by VAL-WORK-001/002."
+      },
+      {
+        "file": "skills/define-worker-skills/SKILL.md",
+        "line": 310,
+        "severity": "non_blocking",
+        "description": "The handoff schema allows `discoveredIssues` severity `suggestion`, which is not part of the handoff convention demonstrated by existing worker handoffs in this mission (`blocking`/`non_blocking`). This makes the guidance inconsistent and risks producing handoffs the orchestrator or reviewers are not expecting."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The worker deviated from the requested `extension-builder` procedure because that skill was unavailable in the environment, but the feature handoff still marked `followedProcedure: true`.",
+      "evidence": "Handoff skillFeedback in /Users/codex/.factory/missions/9e5cdf43-7a7b-4e1b-b796-31b974feb42a/handoffs/2026-03-12T22-23-22-549Z__define-worker-skills-skill__736c0f16-3eb7-4da4-bb45-e0ba4a415881.json records a deviation: 'Invoke extension-builder skill' failed because the skill was not found. Transcript skeleton shows `Skill { \"skill\": \"extension-builder\" }` returned `Error: Skill \"extension-builder\" not found`."
+    },
+    {
+      "area": "conventions",
+      "observation": "Shared guidance is inconsistent about whether mission-specific worker definitions live in `agents/*.md` or `.mission/skills/*/SKILL.md`.",
+      "evidence": "GEMINI.md:161 and .factory/library/architecture.md:13 say agents are defined in `agents/*.md`, while skills/define-worker-skills/SKILL.md:119-122 instructs planners to place per-mission workers under `.mission/skills/<worker-name>/SKILL.md`."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed the feature metadata, transcript skeleton, handoff, commit diff, validation contract, and the new skill file. The skill is well-structured, but it fails review because it directs planners to create worker definitions in the wrong path/format for this mission, and its handoff severity guidance is inconsistent with existing mission conventions. Report written to the planning scrutiny reviews directory."
+}

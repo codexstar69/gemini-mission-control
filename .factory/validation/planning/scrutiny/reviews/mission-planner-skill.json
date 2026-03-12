@@ -1,0 +1,21 @@
+{
+  "featureId": "mission-planner-skill",
+  "reviewedAt": "2026-03-12T22:29:33.760577Z",
+  "commitId": "a22ba9f",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The feature is implemented as requested. skills/mission-planner/SKILL.md has valid frontmatter, all 7 required phases, explicit vague-description handling, a concrete DAG acyclicity procedure using Kahn's algorithm, coverage-gate enforcement for fulfills ownership, validation-state initialization, .mission scaffolding instructions, and the planning -> orchestrator_turn state transition with totalFeatures update.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The worker transcript shows an attempted activation of the extension-builder skill failing with 'Skill \"extension-builder\" not found', even though the skill exists in the repo under .factory/skills/extension-builder/SKILL.md. This suggests a skill-discovery/runtime availability gap outside the repository instructions.",
+      "evidence": "Worker transcript skeleton for session ea6c38e3-e4ef-4401-9658-c25739226a2e records '## Tool: Skill { \"skill\": \"extension-builder\" }' followed by 'Error: Skill \"extension-builder\" not found'; repository contains /Users/codex/Projects/gemini-mission-control-extension/.factory/skills/extension-builder/SKILL.md."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed feature mission-planner-skill via feature metadata, worker handoff, transcript skeleton, commit a22ba9f, and the resulting skill file. The implementation satisfies the planning validation assertions and no blocking or non-blocking code defects were found; review passes."
+}

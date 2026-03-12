@@ -1,0 +1,59 @@
+{
+  "milestone": "planning",
+  "round": 1,
+  "status": "fail",
+  "validatorsRun": {
+    "test": {
+      "passed": true,
+      "command": "python3 - <<'PY' ... planning structural validation for gemini-extension.json, commands/mission-plan.toml, skills/mission-planner/SKILL.md, skills/define-worker-skills/SKILL.md, GEMINI.md ... PY",
+      "exitCode": 0
+    },
+    "typecheck": {
+      "passed": true,
+      "command": "python3 - <<'PY' ... tomllib/frontmatter validation for commands/*.toml and skills/*/SKILL.md ... PY",
+      "exitCode": 0
+    },
+    "lint": {
+      "passed": true,
+      "command": "gemini extensions uninstall gemini-mission-control && gemini extensions link /Users/codex/Projects/gemini-mission-control-extension",
+      "exitCode": 0
+    }
+  },
+  "reviewsSummary": {
+    "total": 3,
+    "passed": 2,
+    "failed": 1,
+    "failedFeatures": [
+      "define-worker-skills-skill"
+    ]
+  },
+  "blockingIssues": [
+    {
+      "featureId": "define-worker-skills-skill",
+      "severity": "blocking",
+      "description": "skills/define-worker-skills/SKILL.md instructs planners to create worker definitions under .mission/skills/<worker-name>/SKILL.md instead of agents/*.md, which conflicts with this mission's architecture and validation contract for mission-worker/code-quality-worker agent definitions."
+    }
+  ],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "AGENTS.md",
+      "suggestion": "Document where project-local helper skills live and how workers should use them when the runtime Skill tool cannot activate a repo-local .factory/skills entry.",
+      "evidence": "All three planning reviews noted worker attempts to invoke extension-builder via the Skill tool failed even though .factory/skills/extension-builder/SKILL.md exists in the repository.",
+      "isSystemic": true
+    },
+    {
+      "target": "skills",
+      "suggestion": "Standardize guidance on where mission-specific worker definitions belong so planner/worker skills do not disagree between agents/*.md and .mission/skills/*/SKILL.md.",
+      "evidence": "The define-worker-skills review found GEMINI.md and architecture guidance pointing to agents/*.md while skills/define-worker-skills/SKILL.md directed planners to .mission/skills/<worker-name>/SKILL.md.",
+      "isSystemic": true
+    }
+  ],
+  "rejectedObservations": [
+    {
+      "observation": "Repeated extension-builder skill activation failures across planning workers",
+      "reason": "Deduplicated into one systemic guidance update instead of recording the same runtime-discovery issue three times."
+    }
+  ],
+  "previousRound": null
+}

@@ -1,0 +1,21 @@
+{
+  "featureId": "mission-plan-command",
+  "reviewedAt": "2026-03-12T22:29:43.280691Z",
+  "commitId": "d899db3cc9ee9c2014c33a1f67207011ef087eb3",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The mission-plan command update satisfies the planning requirement: it now explicitly instructs the model to use activate_skill for mission-planner, references both the mission directory and the working directory from state.json, and preserves the planning-state guard before activation.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The worker procedure expected the extension-builder skill to be invokable through the Skill tool, but it was only available as a file under .factory/skills and not registered in the skill system. This caused the worker to deviate from the prescribed procedure and read the skill file directly instead.",
+      "evidence": "worker-transcripts.jsonl session 04ef0779-3967-46b9-9581-51255d75384e shows `Skill {\"skill\": \"extension-builder\"}` returning `Error: Skill \"extension-builder\" not found`, followed by reading /Users/codex/Projects/gemini-mission-control-extension/.factory/skills/extension-builder/SKILL.md; handoff.skillFeedback.suggestedChanges records the same gap."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed feature mission-plan-command against its metadata, worker handoff/transcript, and commit d899db3. The command passes review: it implements the required activate_skill wording and mission/work directory references without introducing code issues. One shared-state gap was noted: the extension-builder skill referenced by worker procedure is not registered for Skill-tool invocation."
+}
