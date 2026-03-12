@@ -116,10 +116,11 @@ A list of worker types with:
 
 ### Agent File Location
 
-Agent files are placed in the project's `.mission/skills/` directory (for per-mission workers) or in the extension's `agents/` directory (for reusable workers).
+Worker agent definitions are placed in the extension's `agents/` directory as markdown files with YAML frontmatter:
 
-- Per-mission workers: `<workingDirectory>/.mission/skills/<worker-name>/SKILL.md`
-- Reusable workers: `agents/<worker-name>.md`
+- Agent definitions: `agents/<worker-name>.md`
+
+Each worker type gets its own `.md` file in the `agents/` directory. The file name (without extension) should match the agent's `name` field in the frontmatter.
 
 ### YAML Frontmatter Specification
 
