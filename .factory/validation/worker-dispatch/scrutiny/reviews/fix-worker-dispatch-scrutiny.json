@@ -1,0 +1,25 @@
+{
+  "featureId": "fix-worker-dispatch-scrutiny",
+  "reviewedAt": "2026-03-13T00:00:00Z",
+  "commitId": "adea2967c2283e91e5ca7f253c3ba4b1587c2628",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The fix commit adequately resolves the four prior blocking issues. The worker and code-quality agent definitions now use a consistent high/medium/low severity taxonomy, the orchestrator skill's decision tree and handoff schema were updated to match, validator injection now uses empty preconditions and explicitly skips milestones whose implementation features were all cancelled, and mission-run.toml once again enforces an orchestrator_turn-only entry guard.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "There is still a shared-state gap around worker skill availability: the mission feature and repository include an extension-builder skill, but the worker transcript shows that activating `extension-builder` failed and the worker had to proceed without it. The mission guidance and shared library do not explain why a repo-local skill can exist on disk yet still be unavailable to the worker runtime.",
+      "evidence": "features.json:803 sets `skillName` to `extension-builder`; /Users/codex/Projects/gemini-mission-control-extension/.factory/skills/extension-builder/SKILL.md exists; the worker transcript skeleton for session 8485db1d-6e68-4c1d-a3a3-cbfcbc051da3 shows `Tool: Skill { \"skill\": \"extension-builder\" }` before continuing directly; handoff.skillFeedback.deviations says the worker received `Skill not found`; no matching guidance was found in .factory/library/*.md explaining this mismatch."
+    }
+  ],
+  "addressesFailureFrom": [
+    "/Users/codex/Projects/gemini-mission-control-extension/.factory/validation/worker-dispatch/scrutiny/reviews/worker-agent-definitions.json",
+    "/Users/codex/Projects/gemini-mission-control-extension/.factory/validation/worker-dispatch/scrutiny/reviews/mission-orchestrator-skill.json",
+    "/Users/codex/Projects/gemini-mission-control-extension/.factory/validation/worker-dispatch/scrutiny/reviews/mission-run-command.json"
+  ],
+  "summary": "Pass. I reviewed the prior synthesis and failed reviews, the fix feature handoff/transcript, commit adea2967c2283e91e5ca7f253c3ba4b1587c2628, and the current worker/orchestrator/command files. The fix addresses all previously blocking findings, with only a non-blocking shared-state observation remaining about extension-builder skill availability versus mission guidance."
+}
