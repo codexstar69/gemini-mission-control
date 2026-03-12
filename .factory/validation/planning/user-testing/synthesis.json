@@ -1,0 +1,45 @@
+{
+  "milestone": "planning",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 11,
+    "passed": 11,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-PLAN-001",
+    "VAL-PLAN-002",
+    "VAL-PLAN-003",
+    "VAL-PLAN-004",
+    "VAL-PLAN-007",
+    "VAL-PLAN-008",
+    "VAL-PLAN-009",
+    "VAL-PLAN-010",
+    "VAL-PLAN-005",
+    "VAL-PLAN-006",
+    "VAL-FOUND-015"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "frictions": [
+    "A direct Task invocation for this assertion group exited early with a permissions-safety error, so equivalent CLI/file-surface validation was performed directly by the validator and recorded here.",
+    "The repository root does not include README.md; GEMINI.md and mission guidance served as the equivalent top-level context source.",
+    "The repository does not currently have README.md at the root, so equivalent project context was taken from GEMINI.md plus mission/testing guidance.",
+    "gemini extensions link /Users/codex/Projects/gemini-mission-control-extension printed an interactive confirmation prompt, but with cached credentials it still completed with exit code 0; no non-interactive mission-plan invocation was required for these artifact-level assertions."
+  ],
+  "flowReports": [
+    "/Users/codex/Projects/gemini-mission-control-extension/.factory/validation/planning/user-testing/flows/planning-skill.json",
+    "/Users/codex/Projects/gemini-mission-control-extension/.factory/validation/planning/user-testing/flows/planning-command-worker.json"
+  ],
+  "toolsUsed": [
+    "Read",
+    "Execute",
+    "LS",
+    "Create"
+  ],
+  "previousRound": null,
+  "generatedAt": "2026-03-12T22:56:12.711134Z"
+}

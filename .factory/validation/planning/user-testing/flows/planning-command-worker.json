@@ -1,0 +1,48 @@
+{
+  "surface": "gemini-cli-extension",
+  "group": "planning-command-worker",
+  "namespace": "planning-command-utv-2",
+  "assertions": [
+    {
+      "id": "VAL-PLAN-005",
+      "status": "pass",
+      "reason": "commands/mission-plan.toml is valid TOML and its prompt explicitly tells the model to use activate_skill to load the mission-planner skill for the current mission, referencing both the mission directory/ID and the working directory from state.json.",
+      "evidence": [
+        "python3/tomllib parsed commands/mission-plan.toml successfully (exit 0)",
+        "Prompt text includes: 'Use activate_skill to load the mission-planner skill'",
+        "Prompt text references mission directory ~/.gemini-mc/missions/mis_<id>/ and the workingDirectory field from state.json"
+      ]
+    },
+    {
+      "id": "VAL-PLAN-006",
+      "status": "pass",
+      "reason": "skills/define-worker-skills/SKILL.md has valid frontmatter and includes explicit instructions for worker agent definitions covering kind: local, valid Gemini CLI tool names, and optional model/temperature/max_turns/timeout_mins fields, plus procedural startup/work/cleanup body guidance.",
+      "evidence": [
+        "Frontmatter parsed from skills/define-worker-skills/SKILL.md with name=define-worker-skills and a non-empty description",
+        "Skill text includes 'kind: local' requirement and a valid tool names section listing run_shell_command, google_web_search, glob, read_many_files, etc.",
+        "Skill text documents model, temperature, max_turns, timeout_mins, and body phases Startup/Work/Cleanup"
+      ]
+    },
+    {
+      "id": "VAL-FOUND-015",
+      "status": "pass",
+      "reason": "Each skills/* subdirectory currently present contains a SKILL.md file with valid YAML frontmatter, and each directory name matches the skill name declared in frontmatter.",
+      "evidence": [
+        "Listed skills/: define-worker-skills, mission-planner",
+        "Both skills/define-worker-skills/SKILL.md and skills/mission-planner/SKILL.md exist",
+        "Parsed frontmatter confirms name matches directory for both skills and each includes a non-empty description"
+      ]
+    }
+  ],
+  "frictions": [
+    "The repository does not currently have README.md at the root, so equivalent project context was taken from GEMINI.md plus mission/testing guidance.",
+    "gemini extensions link /Users/codex/Projects/gemini-mission-control-extension printed an interactive confirmation prompt, but with cached credentials it still completed with exit code 0; no non-interactive mission-plan invocation was required for these artifact-level assertions."
+  ],
+  "blockers": [],
+  "toolsUsed": [
+    "Read",
+    "LS",
+    "Execute",
+    "Create"
+  ]
+}

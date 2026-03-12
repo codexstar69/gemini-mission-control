@@ -1,0 +1,89 @@
+{
+  "surface": "gemini-cli-extension",
+  "group": "planning-skill",
+  "namespace": "planning-skill-utv-1",
+  "assertions": [
+    {
+      "id": "VAL-PLAN-001",
+      "status": "pass",
+      "reason": "mission-planner skill contains all seven planning phases with detailed instructions for codebase investigation and artifact generation.",
+      "evidence": [
+        "Found 7 phase headings matching ## Phase [1-7]:",
+        "Phase headings present include Understand Requirements, Investigate Codebase, Identify Milestones, Confirm Milestones, Plan Infrastructure, Plan Testing, and Generate Artifacts.",
+        "Phase 1 and 2 explicitly mention read_file, grep_search, and list_directory usage."
+      ]
+    },
+    {
+      "id": "VAL-PLAN-002",
+      "status": "pass",
+      "reason": "mission-planner specifies VAL-XXX-NNN style assertions with behavioral descriptions and evidence requirements.",
+      "evidence": [
+        "Skill includes regex-compatible example IDs such as VAL-AUTH-001 and VAL-API-002.",
+        "Section 7.1 describes validation-contract.md generation with behavioral descriptions, pass/fail criteria, and evidence requirements."
+      ]
+    },
+    {
+      "id": "VAL-PLAN-003",
+      "status": "pass",
+      "reason": "mission-planner requires features.json entries to include fulfills arrays and enforces coverage gate ownership for each VAL assertion.",
+      "evidence": [
+        "Section 7.2 defines features.json entries containing fulfills arrays.",
+        "Coverage Gate section requires every VAL-XXX-NNN assertion to appear in exactly one feature fulfills array."
+      ]
+    },
+    {
+      "id": "VAL-PLAN-004",
+      "status": "pass",
+      "reason": "mission-planner instructs creation of the .mission/ directory with services.yaml, init.sh, library files, and skills directories.",
+      "evidence": [
+        "Section 7.6 lists .mission/services.yaml and .mission/init.sh.",
+        "Section 7.6 lists .mission/library/architecture.md, environment.md, and user-testing.md plus .mission/skills/."
+      ]
+    },
+    {
+      "id": "VAL-PLAN-007",
+      "status": "pass",
+      "reason": "mission-planner includes explicit DAG acyclicity validation instructions before finalizing feature preconditions.",
+      "evidence": [
+        "DAG Acyclicity Check section requires topological sorting/Kahn-style validation over feature preconditions.",
+        "The skill says never proceed with a cyclic dependency graph."
+      ]
+    },
+    {
+      "id": "VAL-PLAN-008",
+      "status": "pass",
+      "reason": "mission-planner explicitly requires clarifying questions for vague or minimal project descriptions.",
+      "evidence": [
+        "Phase 1 section Handling Vague or Minimal Descriptions says to ask clarifying questions before proceeding.",
+        "The skill forbids generating a plan from insufficient context."
+      ]
+    },
+    {
+      "id": "VAL-PLAN-009",
+      "status": "pass",
+      "reason": "mission-planner instructs transitioning state.json from planning to orchestrator_turn and updating totalFeatures.",
+      "evidence": [
+        "Section 7.7 is titled State Transition: planning \u2192 orchestrator_turn.",
+        "Procedure includes setting state to orchestrator_turn and totalFeatures to the number of generated features."
+      ]
+    },
+    {
+      "id": "VAL-PLAN-010",
+      "status": "pass",
+      "reason": "mission-planner specifies initializing validation-state.json with every assertion ID in pending status.",
+      "evidence": [
+        "Section 7.3 is dedicated to initializing validation-state.json.",
+        "The example JSON sets each VAL assertion to status pending."
+      ]
+    }
+  ],
+  "frictions": [
+    "A direct Task invocation for this assertion group exited early with a permissions-safety error, so equivalent CLI/file-surface validation was performed directly by the validator and recorded here.",
+    "The repository root does not include README.md; GEMINI.md and mission guidance served as the equivalent top-level context source."
+  ],
+  "blockers": [],
+  "toolsUsed": [
+    "Read",
+    "Execute"
+  ]
+}
