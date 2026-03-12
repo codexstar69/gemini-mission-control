@@ -1,53 +1,45 @@
 {
   "milestone": "planning",
-  "round": 2,
-  "status": "fail",
+  "round": 3,
+  "status": "pass",
   "validatorsRun": {
     "test": {
       "passed": true,
-      "command": "python3 - <<'PY' ... planning structural validation for gemini-extension.json, commands/mission-plan.toml, skills/mission-planner/SKILL.md, skills/define-worker-skills/SKILL.md, GEMINI.md ... PY",
+      "command": "python3 - <<'PY' ... JSON/TOML parsing and required planning artifact existence checks for GEMINI.md, planning skills, and .factory scaffold files ... PY",
       "exitCode": 0
     },
     "typecheck": {
       "passed": true,
-      "command": "python3 - <<'PY' ... tomllib/frontmatter validation for commands/*.toml and skills/*/SKILL.md ... PY",
+      "command": "python3 - <<'PY' ... command TOML prompt validation plus skill frontmatter and directory-name checks ... PY",
       "exitCode": 0
     },
     "lint": {
       "passed": true,
-      "command": "gemini extensions uninstall gemini-mission-control >/dev/null 2>&1 || true && gemini extensions link /Users/codex/Projects/gemini-mission-control-extension",
+      "command": "python3 - <<'PY' ... bash -n across all shell scripts ... PY && cd /Users/codex/Projects/gemini-mission-control-extension && gemini extensions link .",
       "exitCode": 0
     }
   },
   "reviewsSummary": {
     "total": 1,
-    "passed": 0,
-    "failed": 1,
-    "failedFeatures": [
-      "fix-define-worker-skills-agent-path"
-    ]
+    "passed": 1,
+    "failed": 0,
+    "failedFeatures": []
   },
-  "blockingIssues": [
-    {
-      "featureId": "fix-define-worker-skills-agent-path",
-      "severity": "blocking",
-      "description": "The fix corrected the agent-definition path in skills/define-worker-skills/SKILL.md, but it still documents `discoveredIssues` severity `suggestion` instead of restricting the schema to this mission's `blocking` and `non_blocking` convention."
-    }
-  ],
+  "blockingIssues": [],
   "appliedUpdates": [],
   "suggestedGuidanceUpdates": [
     {
       "target": "skills",
-      "suggestion": "Make skill-feedback guidance consistent: workers should not mark `followedProcedure: true` when they record a concrete deviation from required validation or skill-invocation steps.",
-      "evidence": "The original define-worker-skills implementation and its follow-up fix both recorded deviations in `skillFeedback.deviations` while still marking `followedProcedure: true` in their handoffs.",
+      "suggestion": "Ensure feature metadata references only registered skills, and clarify that `skillFeedback.followedProcedure` must be false whenever a worker records an actual deviation such as skipping a missing skill step.",
+      "evidence": "The rerun fix feature still targeted a non-existent `extension-builder` skill in features.json, and the worker handoff for fix-worker-skills-severity-levels recorded a missing-skill deviation while keeping `followedProcedure: true`.",
       "isSystemic": true
     }
   ],
   "rejectedObservations": [
     {
-      "observation": "The original path mismatch between agents/*.md and .mission/skills/*/SKILL.md",
-      "reason": "Rejected for this round because the rerun confirmed the fix commit corrected the worker-definition path; only the remaining severity-schema issue is still actionable."
+      "observation": "The prior agent-definition path mismatch in skills/define-worker-skills/SKILL.md",
+      "reason": "Rejected in round 3 because commit 7b13dfe already corrected the path to agents/<worker-name>.md and the rerun review confirmed that fix remains intact."
     }
   ],
-  "previousRound": ".factory/validation/planning/scrutiny/synthesis.json (round 1 overwritten by round 2 synthesis; prior round status was fail for define-worker-skills-skill)"
+  "previousRound": ".factory/validation/planning/scrutiny/synthesis.json (round 2 failed on remaining suggestion severity in define-worker-skills handoff schema)"
 }
