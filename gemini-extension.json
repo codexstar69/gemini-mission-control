@@ -1,0 +1,9 @@
+{
+  "name": "gemini-mission-control",
+  "version": "0.1.0",
+  "description": "Multi-agent mission control for Gemini CLI",
+  "contextFileName": "GEMINI.md",
+  "commandsDir": "commands",
+  "skillsDir": "skills",
+  "hooksDir": "hooks"
+}
