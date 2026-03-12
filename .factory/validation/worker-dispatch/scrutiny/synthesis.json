@@ -1,0 +1,81 @@
+{
+  "milestone": "worker-dispatch",
+  "round": 1,
+  "status": "fail",
+  "validatorsRun": {
+    "test": {
+      "passed": true,
+      "command": "python3 - <<'PY' ... worker-dispatch structural assertions over mission-worker.md, code-quality-worker.md, mission-orchestrator/SKILL.md, and mission-run.toml ... PY",
+      "exitCode": 0
+    },
+    "typecheck": {
+      "passed": true,
+      "command": "python3 - <<'PY' ... validate agent frontmatter/tool names and parse commands/mission-run.toml with tomllib ... PY",
+      "exitCode": 0
+    },
+    "lint": {
+      "passed": true,
+      "command": "bash -n scripts/scaffold-mission.sh && bash -n scripts/validate-state.sh && cd /Users/codex/Projects/gemini-mission-control-extension && gemini extensions link .",
+      "exitCode": 0
+    }
+  },
+  "reviewsSummary": {
+    "total": 3,
+    "passed": 0,
+    "failed": 3,
+    "failedFeatures": [
+      "worker-agent-definitions",
+      "mission-orchestrator-skill",
+      "mission-run-command"
+    ]
+  },
+  "blockingIssues": [
+    {
+      "featureId": "worker-agent-definitions",
+      "severity": "blocking",
+      "description": "agents/mission-worker.md limits discoveredIssues severities to blocking/non_blocking, which is too coarse for the worker-dispatch decision tree described elsewhere in the mission artifacts."
+    },
+    {
+      "featureId": "worker-agent-definitions",
+      "severity": "blocking",
+      "description": "agents/code-quality-worker.md repeats the same blocking/non_blocking-only severity model, leaving no way to distinguish follow-up-worthy findings from misc-milestone issues."
+    },
+    {
+      "featureId": "mission-orchestrator-skill",
+      "severity": "blocking",
+      "description": "skills/mission-orchestrator/SKILL.md injects scrutiny validator examples whose preconditions are prose strings instead of feature IDs, so the validators would not become ready under the skill's own DAG evaluation rules."
+    },
+    {
+      "featureId": "mission-orchestrator-skill",
+      "severity": "blocking",
+      "description": "Step 8 treats milestones with only cancelled implementation features as ready for validator injection, which contradicts the later rule that fully cancelled milestones need no validation."
+    },
+    {
+      "featureId": "mission-run-command",
+      "severity": "blocking",
+      "description": "commands/mission-run.toml allows /mission-run to proceed from worker_running even though the feature contract required an orchestrator_turn-only guard with an error for any other state."
+    },
+    {
+      "featureId": "mission-run-command",
+      "severity": "blocking",
+      "description": "commands/mission-run.toml also allows handoff_review even though the orchestrator skill prerequisites and crash-recovery flow do not support starting from that state."
+    }
+  ],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "AGENTS.md",
+      "suggestion": "Clarify how mission feature skillName values should map to actually installed worker skills, and tell workers where project-local skills live before they conclude a named skill is unavailable.",
+      "evidence": "All three worker-dispatch reviews reported the same mismatch: mission features reference skillName 'extension-builder', worker transcripts show Skill activation failing with 'Skill \"extension-builder\" not found', yet the repo contains .factory/skills/extension-builder/SKILL.md.",
+      "isSystemic": true
+    },
+    {
+      "target": "skills",
+      "suggestion": "Choose and document one canonical issue-severity taxonomy across worker handoffs, orchestrator routing, and GEMINI.md so downstream decision logic is unambiguous.",
+      "evidence": "The worker-dispatch reviews found GEMINI.md describing high/critical vs low/medium routing while worker handoffs and the orchestrator skill use blocking/non_blocking, leading to incompatible expectations for discoveredIssues severity.",
+      "isSystemic": true
+    }
+  ],
+  "rejectedObservations": [],
+  "previousRound": null
+}

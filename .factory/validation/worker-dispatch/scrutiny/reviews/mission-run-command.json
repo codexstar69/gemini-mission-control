@@ -1,0 +1,34 @@
+{
+  "featureId": "mission-run-command",
+  "reviewedAt": "2026-03-13T00:00:00Z",
+  "commitId": "410ce6abea9ae86c91cc2ce0efd500c5ccfd24e7",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The feature only partially satisfies the stated requirement. mission-pause.toml and mission-resume.toml match the requested state transitions, and mission-run.toml now explicitly instructs activate_skill for mission-orchestrator. However, mission-run.toml no longer enforces the required orchestrator_turn-only entry guard and instead permits worker_running and handoff_review, which conflicts with the feature description and with the mission-orchestrator skill's documented prerequisites/crash-recovery flow.",
+    "issues": [
+      {
+        "file": "commands/mission-run.toml",
+        "line": 12,
+        "severity": "blocking",
+        "description": "The command now permits /mission-run to continue when state.json is worker_running, but the feature explicitly required: read state.json to verify the mission is in orchestrator_turn state, and if state is not orchestrator_turn, display an error. This weakens the required guard instead of implementing it."
+      },
+      {
+        "file": "commands/mission-run.toml",
+        "line": 13,
+        "severity": "blocking",
+        "description": "The command also permits handoff_review, but the mission-orchestrator skill does not list handoff_review as a valid starting prerequisite or recovery state. Its prerequisites mention orchestrator_turn or worker_running only, and its crash-recovery section only handles worker_running. Starting from handoff_review is therefore unsupported and outside both the feature contract and the skill's documented procedure."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The worker reported that the extension-builder skill was not available and skipped invoking it, even though the mission shared state contains .factory/skills/extension-builder/SKILL.md. This suggests a gap between mission feature metadata (skillName: extension-builder) and the actual worker-facing skill activation path/documentation.",
+      "evidence": "Transcript skeleton for workerSessionId cd095fd5-5cd6-4907-a1bf-6c20e28eb458 shows 'Skill \"extension-builder\" not found'. The mission shared state contains /Users/codex/Projects/gemini-mission-control-extension/.factory/skills/extension-builder/SKILL.md, while features.json for mission-run-command sets skillName to extension-builder."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Review failed. The implementation improved mission-run.toml's skill-activation wording, but it violated the feature's required state guard by allowing worker_running and handoff_review instead of erroring on any non-orchestrator_turn state. mission-pause.toml and mission-resume.toml were acceptable based on the reviewed command content."
+}

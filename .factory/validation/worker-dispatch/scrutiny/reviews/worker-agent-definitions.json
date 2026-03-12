@@ -1,0 +1,34 @@
+{
+  "featureId": "worker-agent-definitions",
+  "reviewedAt": "2026-03-12T23:10:22.413830+00:00",
+  "commitId": "1242a4af0da3fbcc4b3f2dcafc0553e65a312e46",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The two agent definition files were added with the requested frontmatter, phase structure, init.sh handling, and JSON handoff instructions. However, both agents constrain discovered issue severities to blocking/non_blocking, which is incompatible with the mission's worker-dispatch decision tree that routes high/critical issues differently from low/medium issues.",
+    "issues": [
+      {
+        "file": "agents/mission-worker.md",
+        "line": 182,
+        "severity": "blocking",
+        "description": "The mission worker handoff spec only permits discoveredIssues severities `blocking` and `non_blocking`. The worker-dispatch mission architecture depends on finer-grained severities for downstream routing (for example, separate handling for high/critical vs low/medium issues), so this agent cannot emit the data shape the orchestrator flow needs."
+      },
+      {
+        "file": "agents/code-quality-worker.md",
+        "line": 76,
+        "severity": "blocking",
+        "description": "The code-quality worker likewise limits findings to `blocking` and `non_blocking`, and its handoff schema repeats the same restriction. That makes review findings too coarse for the planned decision tree behavior and leaves no way to distinguish follow-up-worthy issues from misc-milestone issues."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The feature metadata points workers at the `extension-builder` skill, but that skill is not present in the repository's installed skills. The worker transcript shows the agent had to bypass the assigned skill and proceed ad hoc.",
+      "evidence": "features.json:675 sets `skillName` to `extension-builder`; `skills/` only contains define-worker-skills, mission-orchestrator, and mission-planner; transcript skeleton for worker session cf3dd62f-39aa-4927-ab8f-a03b9a8f8e2e shows `Tool: Skill { \"skill\": \"extension-builder\" }` followed by `Error: Skill \"extension-builder\" not found`."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Review failed because the new worker agent handoff schemas only support blocking/non_blocking issue severities, which is insufficient for the worker-dispatch decision tree. I also noted a shared-state gap: the assigned `extension-builder` skill is referenced in mission metadata but is not actually installed in the project."
+}

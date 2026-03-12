@@ -1,0 +1,45 @@
+{
+  "featureId": "mission-orchestrator-skill",
+  "reviewedAt": "2026-03-13T00:00:00.000Z",
+  "commitId": "de7fa13e179587a570228ff891ffe097b4b0ecc0",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "fail",
+  "codeReview": {
+    "summary": "The skill is comprehensive and covers the requested run-loop topics, but it has two blocking orchestration bugs in milestone validation handling plus one smaller messaging issue. The validator feature injection example uses an invalid precondition shape that the orchestrator's own DAG logic cannot satisfy, and the milestone-completion logic would inject validators even when every implementation feature in a milestone was cancelled.",
+    "issues": [
+      {
+        "file": "skills/mission-orchestrator/SKILL.md",
+        "line": 482,
+        "severity": "blocking",
+        "description": "The injected scrutiny validator example sets `preconditions` to `[\"All implementation features for milestone \"<milestone>\" are complete\"]`, but Step 2 defines preconditions as feature IDs whose statuses must be checked in `features.json`. This placeholder string is not a real feature ID, so the validator would never become ready under the skill's own DAG evaluation rules."
+      },
+      {
+        "file": "skills/mission-orchestrator/SKILL.md",
+        "line": 469,
+        "severity": "blocking",
+        "description": "Step 8 treats a milestone as ready for validator injection when all implementation features are `completed` or `cancelled`, which means a milestone with only cancelled implementation work still triggers validator creation. That contradicts the later cancellation rule at line 659 saying a fully cancelled milestone needs no validation, and can cause unnecessary or stuck validator work."
+      },
+      {
+        "file": "skills/mission-orchestrator/SKILL.md",
+        "line": 428,
+        "severity": "non_blocking",
+        "description": "Step 7.4 unconditionally writes a `feature_completed` message after every handoff-review cycle. On Option B retries or Option C partial completions, that message type is inaccurate and can mislead downstream agents consuming `messages.jsonl`."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The mission assigned this feature with `skillName: extension-builder`, but that skill does not exist in the repo. The worker transcript shows an attempted activation failure and fallback to direct work, so the mission's feature metadata and available skills are out of sync.",
+      "evidence": "Mission features.json lines 709-710 set `skillName` to `extension-builder`; worker transcript for session 1672ee7e-38bb-46dd-8f24-e0018251574b records `Error: Skill \"extension-builder\" not found`."
+    },
+    {
+      "area": "conventions",
+      "observation": "Severity terminology is inconsistent across mission artifacts: GEMINI.md and the feature description talk about high/critical vs low/medium issues, while the worker handoff contract and this skill use `blocking`/`non_blocking`. The implementation followed the worker contract, but the shared state documents do not define a single canonical severity scheme.",
+      "evidence": "GEMINI.md lines 219-223 describe Option A as high/critical and Option D as low/medium; agents/mission-worker.md lines 163-187 define `discoveredIssues.severity` as `blocking` or `non_blocking`; skills/mission-orchestrator/SKILL.md lines 311 and 367 use the blocking/non_blocking terms."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Reviewed the worker handoff, commit diff, transcript skeleton, and `skills/mission-orchestrator/SKILL.md`. The feature is close, but it fails review because validator injection is specified in a way that can leave injected validators unschedulable and can incorrectly inject validation for fully cancelled milestones."
+}
