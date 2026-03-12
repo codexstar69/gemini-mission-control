@@ -1,0 +1,5 @@
+commands:
+  validate-json: "jq . < /dev/null"
+  validate-extension: "cd /Users/codex/Projects/gemini-mission-control-extension && gemini extensions link ."
+  validate-toml: "python3 -c 'import tomllib, sys; tomllib.load(open(sys.argv[1], \"rb\"))'"
+  validate-shell: "shellcheck"
