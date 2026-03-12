@@ -1,0 +1,31 @@
+description = "Start the autonomous orchestrator run loop to dispatch workers"
+prompt = """
+The user wants to run the mission orchestrator. Arguments: {{args}}
+
+Follow these steps:
+
+1. Find the active mission. If {{args}} contains a mission ID, use it. Otherwise, find the most recently updated mission:
+   `ls -td ~/.gemini-mc/missions/mis_*/ 2>/dev/null | head -1`
+   If no missions exist, tell the user: "No missions found. Use /mission-start to create one first."
+
+2. Read the mission's state.json to verify the mission is in the "orchestrator_turn" state.
+   If the state is "planning", tell the user: "This mission is still in planning. Run /mission-plan first to complete planning."
+   If the state is "paused", tell the user: "This mission is paused. Run /mission-resume to resume execution."
+   If the state is "completed", tell the user: "This mission is already completed."
+   If the state is "failed", tell the user: "This mission has failed. Check the progress log for details."
+   Only proceed if the state is "orchestrator_turn".
+
+3. Activate the mission-orchestrator skill. The skill drives the autonomous run loop:
+   - Read state and evaluate the feature DAG for ready features
+   - Construct enriched worker prompts with context from .mission/ files
+   - Dispatch worker subagents for each ready feature
+   - Parse structured JSON handoffs from workers
+   - Apply the decision tree (Options A/B/C/D) based on outcomes
+   - Update state, log progress, check milestone completion
+   - Auto-inject validators when milestones complete
+   - Loop until all features are done or intervention is needed
+
+4. The orchestrator will manage the full execution lifecycle autonomously.
+
+Begin by reading the mission state and then activate the mission-orchestrator skill to start the run loop.
+"""

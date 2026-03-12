@@ -1,0 +1,28 @@
+description = "Activate the mission planner to begin interactive planning"
+prompt = """
+The user wants to plan the current active mission. Arguments: {{args}}
+
+Follow these steps:
+
+1. Find the active mission. If {{args}} contains a mission ID, use it. Otherwise, find the most recently updated mission:
+   `ls -td ~/.gemini-mc/missions/mis_*/ 2>/dev/null | head -1`
+   If no missions exist, tell the user: "No missions found. Use /mission-start to create one first."
+
+2. Read the mission's state.json to verify the mission is in the "planning" state.
+   If the state is not "planning", tell the user: "This mission is in state '<current_state>'. The /mission-plan command can only be used when the mission is in the 'planning' state."
+
+3. Read the mission's working directory from state.json.
+
+4. Activate the mission-planner skill. The skill will guide you through the 7-phase interactive planning procedure:
+   - Phase 1: Understand requirements (Q&A with the user)
+   - Phase 2: Investigate the codebase
+   - Phase 3: Identify milestones (vertical slices)
+   - Phase 4: Confirm milestones with the user
+   - Phase 5: Plan infrastructure and boundaries
+   - Phase 6: Plan testing strategy
+   - Phase 7: Generate mission artifacts (validation-contract.md, features.json, AGENTS.md, .mission/ directory)
+
+5. The planner will generate all required artifacts and transition the mission state from "planning" to "orchestrator_turn".
+
+Begin by reading the mission state and then activate the mission-planner skill to start interactive planning.
+"""

@@ -1,0 +1,33 @@
+description = "Pause the current mission execution"
+prompt = """
+The user wants to pause the current mission. Arguments: {{args}}
+
+Follow these steps:
+
+1. Find the active mission. If {{args}} contains a mission ID, use it. Otherwise, find the most recently updated mission:
+   `ls -td ~/.gemini-mc/missions/mis_*/ 2>/dev/null | head -1`
+   If no missions exist, tell the user: "No missions found. Nothing to pause."
+
+2. Read the mission's state.json file.
+
+3. Check the current state. Only these states can be paused:
+   - "orchestrator_turn" — normal pause
+   - "worker_running" — pause after current worker completes
+   - "handoff_review" — pause after current review completes
+   If the state is "planning", "paused", "completed", or "failed", tell the user the mission cannot be paused from this state.
+
+4. Transition the mission to the "paused" state:
+   - Read the current state.json
+   - Update the "state" field to "paused"
+   - Update the "updatedAt" field to the current ISO 8601 timestamp
+   - Write the updated state.json back to the file
+
+5. Log the pause event to progress_log.jsonl by appending a JSON line:
+   {"timestamp": "<ISO 8601>", "event": "state_transition", "from": "<previous_state>", "to": "paused", "reason": "user_requested"}
+
+6. Confirm to the user:
+   - Mission ID: <missionId>
+   - Previous State: <previous_state>
+   - New State: paused
+   - Message: "Mission paused. Use /mission-resume to continue execution."
+"""

@@ -1,0 +1,41 @@
+description = "Override a failed validator with documented justification"
+prompt = """
+The user wants to override a failed validation. Justification: {{args}}
+
+Follow these steps:
+
+1. If {{args}} is empty, tell the user: "Please provide a justification for the override. Usage: /mission-override <justification>"
+
+2. Find the most recently updated mission:
+   `ls -td ~/.gemini-mc/missions/mis_*/ 2>/dev/null | head -1`
+   If no missions exist, tell the user: "No missions found. Nothing to override."
+
+3. Read the mission's state.json and features.json.
+
+4. Find all validator features that have failed (features with IDs matching "scrutiny-validator-*" or "user-testing-validator-*" whose status is "pending" or where the most recent handoff indicates failure). Also check for features that are blocked due to failed validation.
+
+5. If no failed validators are found, tell the user: "No failed validators found. There is nothing to override."
+
+6. For each failed validator feature found:
+   a. Mark the feature's status as "completed" in features.json
+   b. Increment completedFeatures in state.json
+   c. Read the existing synthesis report (if any) at .mission/validation/<milestone>/<validator-type>/synthesis.json
+   d. Update or create the synthesis report with the override information:
+      {
+        "overridden": true,
+        "overriddenAt": "<ISO 8601 timestamp>",
+        "justification": "{{args}}",
+        "originalResult": "<previous result if available>"
+      }
+
+7. Log the override event to progress_log.jsonl by appending:
+   {"timestamp": "<ISO 8601>", "event": "validation_overridden", "justification": "{{args}}", "features": ["<overridden feature IDs>"]}
+
+8. Update the state.json updatedAt timestamp.
+
+9. Confirm to the user:
+   - Mission ID: <missionId>
+   - Overridden validators: <list of validator feature IDs>
+   - Justification recorded: "{{args}}"
+   - Message: "Validation override applied. The justification has been recorded in the synthesis report. You may now continue with /mission-run."
+"""
