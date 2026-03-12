@@ -17,20 +17,24 @@ NOW="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 # Create mission directory and handoffs subdirectory
 mkdir -p "${MISSION_DIR}/handoffs"
 
-# state.json — initial mission state
-cat > "${MISSION_DIR}/state.json" <<EOF
-{
-  "missionId": "mis_${MISSION_ID}",
-  "state": "planning",
-  "workingDirectory": "${WORKING_DIR}",
-  "completedFeatures": 0,
-  "totalFeatures": 0,
-  "createdAt": "${NOW}",
-  "updatedAt": "${NOW}",
-  "sealedMilestones": [],
-  "milestonesWithValidationPlanned": []
+# state.json — initial mission state (use python3 for safe JSON escaping)
+python3 -c "
+import json, sys
+state = {
+    'missionId': 'mis_' + sys.argv[1],
+    'state': 'planning',
+    'workingDirectory': sys.argv[2],
+    'completedFeatures': 0,
+    'totalFeatures': 0,
+    'createdAt': sys.argv[3],
+    'updatedAt': sys.argv[3],
+    'sealedMilestones': [],
+    'milestonesWithValidationPlanned': []
 }
-EOF
+with open(sys.argv[4], 'w') as f:
+    json.dump(state, f, indent=2)
+    f.write('\n')
+" "${MISSION_ID}" "${WORKING_DIR}" "${NOW}" "${MISSION_DIR}/state.json"
 
 # features.json — empty features array
 cat > "${MISSION_DIR}/features.json" <<EOF

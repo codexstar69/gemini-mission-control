@@ -46,8 +46,16 @@ VALIDATION=$(jq -r '
     (if ($root | has("workingDirectory")) and ($root.workingDirectory | type == "string") then "ok" else "FAIL: workingDirectory must be a string" end),
     (if ($root | has("completedFeatures")) and ($root.completedFeatures | type == "number") and ($root.completedFeatures >= 0) then "ok" else "FAIL: completedFeatures must be a non-negative number" end),
     (if ($root | has("totalFeatures")) and ($root.totalFeatures | type == "number") and ($root.totalFeatures >= 0) then "ok" else "FAIL: totalFeatures must be a non-negative number" end),
-    (if ($root | has("createdAt")) and ($root.createdAt | type == "string") then "ok" else "FAIL: createdAt must be a string (ISO 8601)" end),
-    (if ($root | has("updatedAt")) and ($root.updatedAt | type == "string") then "ok" else "FAIL: updatedAt must be a string (ISO 8601)" end),
+    (if ($root | has("createdAt")) and ($root.createdAt | type == "string") then
+      if ($root.createdAt | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}")) then "ok"
+      else "FAIL: createdAt must be an ISO-8601 timestamp (got: \($root.createdAt))"
+      end
+    else "FAIL: createdAt must be a string (ISO 8601)" end),
+    (if ($root | has("updatedAt")) and ($root.updatedAt | type == "string") then
+      if ($root.updatedAt | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}")) then "ok"
+      else "FAIL: updatedAt must be an ISO-8601 timestamp (got: \($root.updatedAt))"
+      end
+    else "FAIL: updatedAt must be a string (ISO 8601)" end),
     (if ($root | has("sealedMilestones")) and ($root.sealedMilestones | type == "array") then "ok" else "FAIL: sealedMilestones must be an array" end),
     (if ($root | has("milestonesWithValidationPlanned")) and ($root.milestonesWithValidationPlanned | type == "array") then "ok" else "FAIL: milestonesWithValidationPlanned must be an array" end);
   check

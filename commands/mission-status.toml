@@ -4,18 +4,20 @@ The user wants to check mission status. Arguments: {{args}}
 
 Follow these steps:
 
-1. If the user provided a mission ID in {{args}}, use that ID. Otherwise, find the most recently updated mission by listing all directories in ~/.gemini-mc/missions/ and reading each state.json to find the one with the latest updatedAt timestamp.
+1. If the user provided a mission ID in {{args}}, use that ID. Otherwise, find the most recently updated mission by reading the updatedAt field from every state.json and picking the latest one (do NOT use directory modification times).
 
-2. To find the most recent mission (if no ID given), run:
-   `ls -td ~/.gemini-mc/missions/mis_*/ 2>/dev/null | head -1`
-   If this returns nothing, tell the user "No missions found. Use /mission-start to create one."
+2. To find the most recent mission (if no ID given):
+   a. List all directories matching ~/.gemini-mc/missions/mis_*/
+   b. For each directory, read state.json and extract the updatedAt field
+   c. Compare updatedAt timestamps (ISO-8601 format) and select the mission with the latest updatedAt value
+   d. If no mission directories exist, tell the user "No missions found. Use /mission-start to create one."
 
 3. If a mission ID was provided via {{args}}, look for it at:
    ~/.gemini-mc/missions/{{args}}/state.json
    or ~/.gemini-mc/missions/mis_{{args}}/state.json
    If neither exists, tell the user that mission was not found.
 
-4. Read the state.json file from the mission directory.
+4. Read the state.json file from the selected mission directory.
 
 5. Display the mission status in a clear format:
    - Mission ID: (missionId field)
