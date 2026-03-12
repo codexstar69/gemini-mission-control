@@ -1,0 +1,29 @@
+{
+  "milestone": "worker-dispatch",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-WORK-001",
+    "VAL-WORK-002",
+    "VAL-WORK-003",
+    "VAL-WORK-004",
+    "VAL-WORK-005",
+    "VAL-WORK-006",
+    "VAL-WORK-007",
+    "VAL-WORK-008",
+    "VAL-WORK-009",
+    "VAL-WORK-010",
+    "VAL-WORK-011",
+    "VAL-WORK-012"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "previousRound": null
+}

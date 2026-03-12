@@ -1,0 +1,67 @@
+{
+  "groupId": "agents-a",
+  "surface": "gemini-cli-extension",
+  "testedAt": "2026-03-13T00:00:00Z",
+  "credentials": {
+    "account": "local-shell-validator-a@example.test",
+    "namespace": "utv-worker-dispatch-agents-a"
+  },
+  "toolsUsed": [
+    "Read",
+    "Grep",
+    "Execute"
+  ],
+  "assertions": [
+    {
+      "id": "VAL-WORK-001",
+      "title": "Mission worker agent has correct definition",
+      "status": "pass",
+      "reason": "agents/mission-worker.md has the required frontmatter fields, required tool set, max_turns 100, timeout_mins 30, and body sections for startup, work, cleanup, and structured handoff.",
+      "evidence": [
+        "agents/mission-worker.md:2 name: mission-worker",
+        "agents/mission-worker.md:4 kind: local",
+        "agents/mission-worker.md:12-15 model gemini-2.5-pro, temperature 0.1, max_turns 100, timeout_mins 30",
+        "agents/mission-worker.md:31 ## Phase 1: Startup",
+        "agents/mission-worker.md:68 ## Phase 2: Work",
+        "agents/mission-worker.md:113 ## Phase 3: Cleanup & Handoff",
+        "agents/mission-worker.md:127 requires a structured JSON handoff",
+        "Frontmatter tool validation via python script confirmed read_file, write_file, replace, run_shell_command, grep_search, and list_directory are all present"
+      ]
+    },
+    {
+      "id": "VAL-WORK-002",
+      "title": "Code quality worker agent has correct definition",
+      "status": "pass",
+      "reason": "agents/code-quality-worker.md has the required frontmatter fields, required tool set, and a body centered on code review/refactoring with a structured handoff protocol.",
+      "evidence": [
+        "agents/code-quality-worker.md:2 name: code-quality-worker",
+        "agents/code-quality-worker.md:4 kind: local",
+        "agents/code-quality-worker.md:12-15 model gemini-2.5-pro, temperature 0.1, max_turns 60, timeout_mins 20",
+        "agents/code-quality-worker.md:61 ## Phase 2: Review & Refactor",
+        "agents/code-quality-worker.md:63 ### 2.1 Code Review",
+        "agents/code-quality-worker.md:111 ## Phase 3: Cleanup & Handoff",
+        "agents/code-quality-worker.md:125 requires a structured JSON handoff",
+        "Frontmatter tool validation via python script confirmed read_file, write_file, replace, run_shell_command, grep_search, and list_directory are all present"
+      ]
+    },
+    {
+      "id": "VAL-WORK-008",
+      "title": "Worker agents include init.sh execution instructions",
+      "status": "pass",
+      "reason": "Both worker agent bodies instruct the agent to run .mission/init.sh if it exists before implementation/review work and explicitly say to run it once at the start of the session.",
+      "evidence": [
+        "agents/mission-worker.md:46 ### 1.3 Run init.sh",
+        "agents/mission-worker.md:48-54 says to execute bash .mission/init.sh if it exists and to run it once at the start of the session, not per feature",
+        "agents/code-quality-worker.md:45 ### 1.3 Run init.sh",
+        "agents/code-quality-worker.md:47-53 says to execute bash .mission/init.sh if it exists and to run it once at the start of the session",
+        "Shell existence check on /Users/codex/Projects/gemini-mission-control-extension/.mission/init.sh returned non-zero, confirming the assertion was validated from agent instructions rather than an existing repo script"
+      ]
+    }
+  ],
+  "frictions": [
+    "Repository root does not currently contain README.md; used GEMINI.md as the equivalent top-level documentation surface after confirming project structure.",
+    "The repo does not currently have a .mission/init.sh file, so VAL-WORK-008 was validated against the required worker-agent instructions rather than by executing init.sh."
+  ],
+  "blockers": [],
+  "summary": "Validated 3 worker-dispatch assertions on the real repository surface. VAL-WORK-001, VAL-WORK-002, and VAL-WORK-008 all passed based on direct inspection of agents/mission-worker.md and agents/code-quality-worker.md plus shell-backed frontmatter checks."
+}

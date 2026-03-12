@@ -1,0 +1,119 @@
+{
+  "groupId": "orchestrator-b",
+  "surface": "gemini-cli-extension",
+  "testedAt": "2026-03-12T23:41:03.600418+00:00",
+  "credentials": {
+    "account": "local-shell-validator-b@example.test",
+    "namespace": "utv-worker-dispatch-orchestrator-b"
+  },
+  "toolsUsed": [
+    "Read",
+    "Grep",
+    "Execute",
+    "python3"
+  ],
+  "assertions": [
+    {
+      "id": "VAL-WORK-003",
+      "status": "pass",
+      "reason": "skills/mission-orchestrator/SKILL.md contains valid frontmatter plus an explicit 8-step run loop covering read state/crash recovery, DAG evaluation, worker prompt construction, dispatch, handoff parsing, decision tree, state/log updates, and milestone validator injection.",
+      "evidence": [
+        "skills/mission-orchestrator/SKILL.md:1-4 frontmatter defines name=mission-orchestrator and description.",
+        "skills/mission-orchestrator/SKILL.md:27-43 'Run Loop Overview' lists Steps 1-8.",
+        "skills/mission-orchestrator/SKILL.md:46-130 Step 1-2 cover state read/crash recovery and DAG evaluation.",
+        "skills/mission-orchestrator/SKILL.md:139-198 Step 3 covers worker prompt construction.",
+        "skills/mission-orchestrator/SKILL.md:212-235 Step 4 covers worker dispatch.",
+        "skills/mission-orchestrator/SKILL.md:239-301 Step 5 covers structured handoff parsing.",
+        "skills/mission-orchestrator/SKILL.md:305-396 Step 6 covers decision tree options.",
+        "skills/mission-orchestrator/SKILL.md:398-452 Step 7 covers state/log updates; 456-545 Step 8 covers milestone completion and validator injection.",
+        "Command output: python3 string-scan confirmed step1_heading=true through step8_heading=true."
+      ]
+    },
+    {
+      "id": "VAL-WORK-004",
+      "status": "pass",
+      "reason": "The orchestrator skill explicitly defines prompt enrichment sources: feature description, expectedBehavior, verificationSteps, fulfills assertions, .mission/services.yaml, .mission/library/*.md, per-skill SKILL.md, and mission AGENTS.md.",
+      "evidence": [
+        "skills/mission-orchestrator/SKILL.md:143-154 includes feature description, expectedBehavior, verificationSteps, and fulfills in the worker prompt.",
+        "skills/mission-orchestrator/SKILL.md:157-171 requires reading .mission/services.yaml, .mission/library/*.md, .mission/skills/<skillName>/SKILL.md, and AGENTS.md.",
+        "skills/mission-orchestrator/SKILL.md:173-181 requires extracting relevant fulfills assertions from validation-contract.md.",
+        "Command output: Grep matched Step 3 prompt construction and validation assertion enrichment sections."
+      ]
+    },
+    {
+      "id": "VAL-WORK-005",
+      "status": "pass",
+      "reason": "The worker handoff schema is explicitly defined with salientSummary, implementation/undone summaries, verification.commandsRun, verification.interactiveChecks, tests.added, and discoveredIssues entries.",
+      "evidence": [
+        "skills/mission-orchestrator/SKILL.md:245-270 shows the JSON handoff schema.",
+        "skills/mission-orchestrator/SKILL.md:274-280 validates required handoff fields including salientSummary, whatWasImplemented, verification.commandsRun, and discoveredIssues.",
+        "Command output: python3 regex scan reported tests_added_nested=true and handoff_file=true."
+      ]
+    },
+    {
+      "id": "VAL-WORK-006",
+      "status": "pass",
+      "reason": "All four orchestrator decision branches are present and described: high-severity follow-up creation, retry-on-failure reset, partial completion rewrite, and misc milestone creation for medium/low issues.",
+      "evidence": [
+        "skills/mission-orchestrator/SKILL.md:311-330 defines Option A for high-severity follow-up features.",
+        "skills/mission-orchestrator/SKILL.md:332-349 defines Option B for failures and retries.",
+        "skills/mission-orchestrator/SKILL.md:351-365 defines Option C for partial completion.",
+        "skills/mission-orchestrator/SKILL.md:367-387 defines Option D for misc milestone features.",
+        "Command output: python3 regex scan reported optiona=true, optionb=true, optionc=true, optiond=true."
+      ]
+    },
+    {
+      "id": "VAL-WORK-009",
+      "status": "pass",
+      "reason": "The skill specifies the required state transitions across dispatch, handoff review, orchestrator return, and mission completion.",
+      "evidence": [
+        "skills/mission-orchestrator/SKILL.md:218-224 sets state to worker_running before dispatch and logs worker_started.",
+        "skills/mission-orchestrator/SKILL.md:294-300 sets state to handoff_review after worker completion.",
+        "skills/mission-orchestrator/SKILL.md:413-423 returns state to orchestrator_turn and logs a state_transition from handoff_review.",
+        "skills/mission-orchestrator/SKILL.md:95-97, 104-106, and 547-549 show orchestrator_turn to completed transitions for empty, cancelled, and fully sealed missions.",
+        "Command output: python3 regex scan reported transition_dispatch=true, transition_handoff_review=true, transition_return=true, transition_completed=true."
+      ]
+    },
+    {
+      "id": "VAL-WORK-010",
+      "status": "pass",
+      "reason": "The skill checks milestone completion after feature completion, separates implementation from validator features, and injects scrutiny and user-testing validators with the required dependency ordering.",
+      "evidence": [
+        "skills/mission-orchestrator/SKILL.md:460-473 describes milestone completion detection based on all implementation features being completed/cancelled.",
+        "skills/mission-orchestrator/SKILL.md:480-497 defines scrutiny-validator-<milestone>.",
+        "skills/mission-orchestrator/SKILL.md:500-517 defines user-testing-validator-<milestone> with preconditions [\"scrutiny-validator-<milestone>\"].",
+        "skills/mission-orchestrator/SKILL.md:519-531 states user-testing depends on scrutiny and logs milestone_completed plus validation_injected.",
+        "Command output: python3 regex scan reported inject_scrutiny=true and inject_user_testing=true; manual read confirmed user-testing preconditions include scrutiny-validator-<milestone>."
+      ]
+    },
+    {
+      "id": "VAL-WORK-011",
+      "status": "pass",
+      "reason": "The orchestrator requires persisting each worker handoff as JSON in the mission handoffs directory using the feature ID in the filename.",
+      "evidence": [
+        "skills/mission-orchestrator/SKILL.md:282-290 instructs writing the complete handoff JSON to ~/.gemini-mc/missions/mis_<id>/handoffs/<feature-id>.json.",
+        "skills/mission-orchestrator/SKILL.md:290 states the file must contain valid JSON matching the handoff schema.",
+        "Command output: Grep matched handoffs/<feature-id>.json and the write_file instruction."
+      ]
+    },
+    {
+      "id": "VAL-WORK-012",
+      "status": "pass",
+      "reason": "The skill documents progress_log.jsonl event coverage for worker_started, worker_completed, state_transition, milestone_completed, and validation_injected, each tied to when the event is logged and including timestamps in example JSON.",
+      "evidence": [
+        "skills/mission-orchestrator/SKILL.md:222-224 shows worker_started event JSON with timestamp.",
+        "skills/mission-orchestrator/SKILL.md:298-300 shows worker_completed event JSON with timestamp.",
+        "skills/mission-orchestrator/SKILL.md:421-423 shows state_transition event JSON with timestamp.",
+        "skills/mission-orchestrator/SKILL.md:433-452 lists progress_log.jsonl event types including worker_started, worker_completed, state_transition, milestone_completed, and validation_injected.",
+        "skills/mission-orchestrator/SKILL.md:528-531 shows milestone_completed and validation_injected event JSON with timestamp.",
+        "Command output: python3 regex scan reported event_worker_started=true, event_worker_completed=true, event_state_transition=true, event_milestone_completed=true, event_validation_injected=true."
+      ]
+    }
+  ],
+  "frictions": [
+    "Repository root does not currently contain README.md despite mission guidance mentioning one; used GEMINI.md and direct skill-file inspection after confirming the repo layout.",
+    "This validation was file-surface based because the assigned assertions target declarative orchestrator skill content rather than an executable interactive CLI flow."
+  ],
+  "blockers": [],
+  "summary": "Validated 8 orchestrator assertions against the real repository state. All assigned assertions passed based on direct inspection of skills/mission-orchestrator/SKILL.md and supporting command output."
+}

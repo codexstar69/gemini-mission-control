@@ -1,0 +1,35 @@
+{
+  "groupId": "run-c",
+  "surface": "gemini-cli-extension",
+  "testedAt": "2026-03-13T00:00:00Z",
+  "credentials": {
+    "account": "local-shell-validator-c@example.test",
+    "namespace": "utv-worker-dispatch-run-c"
+  },
+  "assertions": [
+    {
+      "id": "VAL-WORK-007",
+      "status": "pass",
+      "reason": "commands/mission-run.toml explicitly instructs Gemini to activate the mission-orchestrator skill and start the autonomous run loop for the current mission after validating that the mission is in orchestrator_turn state.",
+      "evidence": [
+        "commands/mission-run.toml step 4: 'Use activate_skill to load the mission-orchestrator skill.'",
+        "commands/mission-run.toml step 5: 'Follow the mission-orchestrator skill's instructions... until all features are done or intervention is needed.'",
+        "commands/mission-run.toml final line: '...call activate_skill to load the mission-orchestrator skill and start the run loop.'",
+        "python3 tomllib validation confirmed the prompt contains both activate_skill + mission-orchestrator and autonomous run loop language (exit 0).",
+        "gemini extensions link . completed with exit code 0 from the repo root and listed the mission-orchestrator skill for the extension."
+      ]
+    }
+  ],
+  "toolsUsed": [
+    "Read",
+    "Grep",
+    "Execute",
+    "Create"
+  ],
+  "frictions": [
+    "The mission README was absent at repo root, so initial repo-orientation evidence came from directory inspection plus GEMINI.md/mission docs instead.",
+    "A non-interactive end-to-end /mission-run invocation was not needed because the TOML prompt and extension link output already gave direct evidence of skill activation and run-loop intent without creating mission state artifacts."
+  ],
+  "blockers": [],
+  "summary": "Validated VAL-WORK-007 as passing from direct mission-run TOML evidence and extension-link confirmation: the command activates the mission-orchestrator skill and instructs Gemini to begin the autonomous run loop for the current mission."
+}
