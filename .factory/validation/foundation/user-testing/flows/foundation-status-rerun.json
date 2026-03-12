@@ -1,0 +1,114 @@
+{
+  "groupId": "foundation-status-rerun",
+  "testedAt": "2026-03-13T00:00:00Z",
+  "credentials": {
+    "account": null,
+    "namespace": "utv-found-r2-status"
+  },
+  "toolsUsed": [
+    "gemini CLI",
+    "Read",
+    "LS",
+    "Execute"
+  ],
+  "assertionResults": [
+    {
+      "id": "VAL-FOUND-009",
+      "title": "/mission-status command displays current mission state",
+      "status": "fail",
+      "contractExpectations": [
+        "Display mission ID",
+        "Display current state",
+        "Display completed/total features",
+        "Display current milestone",
+        "Display working directory",
+        "Display an appropriate message when no active mission exists"
+      ],
+      "steps": [
+        {
+          "action": "Link extension from /Users/codex/Projects/gemini-mission-control-extension using gemini extensions link",
+          "expected": "Extension installs successfully and is usable from project root",
+          "observed": "gemini reported 'Installing extension \"gemini-mission-control\"' and exited 0 after the confirmation prompt line"
+        },
+        {
+          "action": "Run explicit-ID status command: gemini -p \"/mission-status mis_ddaac4\" --approval-mode=yolo -e gemini-mission-control",
+          "expected": "Output includes mission ID, current state, completed/total features, current milestone, and working directory",
+          "observed": "Output included mission ID mis_ddaac4, state planning, working directory, progress 0 / 0, sealed milestones, and last updated time, but did not include a current milestone field. The response also mentioned a nonexistent ~/gemini-mission-control/src/cli.ts path and fell back to direct state-file reading."
+        },
+        {
+          "action": "Run no-arg status command: gemini -p \"/mission-status\" --approval-mode=yolo -e gemini-mission-control",
+          "expected": "Output should report current mission state or an appropriate no-active-mission message",
+          "observed": "Output reported the latest mission (mis_ddaac4) with state, progress, working directory, and last updated time, but still omitted current milestone. It did not exercise a no-active-mission message because existing missions were present, and the command behavior selected the latest mission instead."
+        },
+        {
+          "action": "Read ~/.gemini-mc/missions/mis_ddaac4/state.json and features.json directly",
+          "expected": "Artifact state should confirm whether missing fields exist in persisted mission data",
+          "observed": "state.json contains missionId, state, workingDirectory, completedFeatures, totalFeatures, createdAt, updatedAt, sealedMilestones, and milestonesWithValidationPlanned; features.json contains an empty features array. No current milestone value exists to render."
+        }
+      ],
+      "evidence": {
+        "commandOutputs": [
+          {
+            "command": "gemini extensions link \"/Users/codex/Projects/gemini-mission-control-extension\"",
+            "exitCode": 0,
+            "summary": "Loaded cached credentials. Installing extension \"gemini-mission-control\". Prompted to continue and exited 0."
+          },
+          {
+            "command": "cd \"/Users/codex/Projects/gemini-mission-control-extension\" && gemini -p \"/mission-status mis_ddaac4\" --approval-mode=yolo -e gemini-mission-control",
+            "exitCode": 0,
+            "summary": "Final response showed Mission ID mis_ddaac4, State planning, Working Directory /Users/codex/Projects/gemini-mission-control-extension, Progress 0 / 0 features completed, Sealed Milestones None, and Last Updated 2026-03-12T21:55:53Z; no current milestone field was shown."
+          },
+          {
+            "command": "cd \"/Users/codex/Projects/gemini-mission-control-extension\" && gemini -p \"/mission-status\" --approval-mode=yolo -e gemini-mission-control",
+            "exitCode": 0,
+            "summary": "Final response showed Mission ID mis_ddaac4, State planning, Progress 0/0 features completed, Working Directory /Users/codex/Projects/gemini-mission-control-extension, and Last Updated 2026-03-12T21:55:53Z; no current milestone field was shown."
+          }
+        ],
+        "filesInspected": [
+          {
+            "path": "/Users/codex/Projects/gemini-mission-control-extension/commands/mission-status.toml",
+            "finding": "Prompt format only requires Mission ID, State, Progress, Working Directory, and Last Updated; it does not instruct the model to display current milestone or a no-active-mission concept."
+          },
+          {
+            "path": "/Users/codex/.gemini-mc/missions/mis_ddaac4/state.json",
+            "finding": "Mission state is readable and matches the displayed mission ID/state/progress/working directory values, but has no dedicated current milestone field."
+          },
+          {
+            "path": "/Users/codex/.gemini-mc/missions/mis_ddaac4/features.json",
+            "finding": "features array is empty, reinforcing that no current milestone can be derived from the mission artifacts."
+          }
+        ]
+      },
+      "issues": [
+        "The explicit-ID and no-arg CLI outputs omit the contract-required current milestone field.",
+        "mission-status.toml encodes a format without current milestone, so the omission is systematic rather than incidental.",
+        "A no-active-mission path could not be exercised non-destructively because existing missions were present and the no-arg command is designed to select the latest mission instead."
+      ]
+    }
+  ],
+  "frictions": [
+    {
+      "description": "Headless gemini runs emitted unrelated MCP discovery errors and skill-conflict warnings before the actual command response.",
+      "resolved": true,
+      "resolution": "Ignored the noise and evaluated the final mission-status output plus mission files on disk.",
+      "affectedAssertions": [
+        "VAL-FOUND-009"
+      ]
+    },
+    {
+      "description": "The explicit-ID mission-status run mentioned a nonexistent ~/gemini-mission-control/src/cli.ts path before falling back to direct state-file reading.",
+      "resolved": true,
+      "resolution": "Used the final CLI response and direct inspection of state.json/features.json to determine whether the contract was met.",
+      "affectedAssertions": [
+        "VAL-FOUND-009"
+      ]
+    }
+  ],
+  "blockers": [],
+  "commandsRun": [
+    "gemini extensions link \"/Users/codex/Projects/gemini-mission-control-extension\"",
+    "cd \"/Users/codex/Projects/gemini-mission-control-extension\" && gemini -p \"/mission-status mis_ddaac4\" --approval-mode=yolo -e gemini-mission-control",
+    "cd \"/Users/codex/Projects/gemini-mission-control-extension\" && gemini -p \"/mission-status\" --approval-mode=yolo -e gemini-mission-control"
+  ],
+  "summary": "VAL-FOUND-009 failed on re-test. Strongest evidence: both real Gemini CLI mission-status invocations omitted the contract-required current milestone field, and commands/mission-status.toml itself only specifies Mission ID, State, Progress, Working Directory, and Last Updated."
+}

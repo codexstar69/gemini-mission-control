@@ -1,0 +1,54 @@
+{
+  "milestone": "foundation",
+  "round": 1,
+  "status": "fail",
+  "assertionsSummary": {
+    "total": 15,
+    "passed": 12,
+    "failed": 3,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-FOUND-001",
+    "VAL-FOUND-002",
+    "VAL-FOUND-013",
+    "VAL-FOUND-003",
+    "VAL-FOUND-004",
+    "VAL-FOUND-005",
+    "VAL-FOUND-012",
+    "VAL-FOUND-006",
+    "VAL-FOUND-008",
+    "VAL-FOUND-010",
+    "VAL-FOUND-011",
+    "VAL-FOUND-014"
+  ],
+  "failedAssertions": [
+    {
+      "id": "VAL-FOUND-016",
+      "reason": "The scaffold includes messages.jsonl, but the repository does not contain the mission-orchestrator skill instructions specifying the messages.jsonl write format with timestamp, sender, type, and content fields."
+    },
+    {
+      "id": "VAL-FOUND-007",
+      "reason": "The agents/ directory contains no .md agent definition files, so required frontmatter and valid tool-name checks cannot pass."
+    },
+    {
+      "id": "VAL-FOUND-009",
+      "reason": "The real /mission-status user flow did not reliably display the specified status output; explicit-ID output omitted current milestone, and no-arg status returned an explanation about a missing cli.ts instead of mission state."
+    }
+  ],
+  "blockedAssertions": [],
+  "appliedUpdates": [
+    {
+      "target": "user-testing.md",
+      "description": "Added Flow Validator Guidance for the gemini-cli-extension surface, including headless Gemini CLI usage, namespace isolation, and evidence expectations for mission-list/status checks.",
+      "source": "setup"
+    }
+  ],
+  "previousRound": null,
+  "flowReports": [
+    ".factory/validation/foundation/user-testing/flows/foundation-manifest.json",
+    ".factory/validation/foundation/user-testing/flows/foundation-scaffold.json",
+    ".factory/validation/foundation/user-testing/flows/foundation-commands.json"
+  ],
+  "generatedAt": "2026-03-12T21:59:45Z"
+}

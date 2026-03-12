@@ -1,0 +1,95 @@
+{
+  "surface": "gemini-cli-extension",
+  "groupId": "foundation-scaffold",
+  "testedAt": "2026-03-12T21:50:04Z",
+  "credentials": {
+    "account": "local-validator-scaffold",
+    "namespace": "utv-foundation-scaffold"
+  },
+  "assertionsTested": [
+    "VAL-FOUND-003",
+    "VAL-FOUND-004",
+    "VAL-FOUND-005",
+    "VAL-FOUND-012",
+    "VAL-FOUND-016"
+  ],
+  "assertionResults": [
+    {
+      "id": "VAL-FOUND-003",
+      "status": "pass",
+      "reason": "scripts/scaffold-mission.sh created the required mission directory structure for isolated mission mis_utvscaf001, including all required files and the handoffs/ subdirectory.",
+      "evidence": [
+        "Executed /Users/codex/Projects/gemini-mission-control-extension/scripts/scaffold-mission.sh utvscaf001 /Users/codex/Projects/gemini-mission-control-extension",
+        "Verified files in /Users/codex/.gemini-mc/missions/mis_utvscaf001: AGENTS.md, features.json, handoffs/, messages.jsonl, mission.md, progress_log.jsonl, state.json, validation-contract.md, validation-state.json",
+        "jq . /Users/codex/.gemini-mc/missions/mis_utvscaf001/state.json exited 0",
+        "jq . /Users/codex/.gemini-mc/missions/mis_utvscaf001/features.json exited 0"
+      ]
+    },
+    {
+      "id": "VAL-FOUND-004",
+      "status": "pass",
+      "reason": "The scaffolded state.json matched the required schema and initial values, including missionId with mis_ prefix and initial state planning.",
+      "evidence": [
+        "scripts/validate-state.sh /Users/codex/.gemini-mc/missions/mis_utvscaf001/state.json reported VALID",
+        "state.json fields verified: missionId=mis_utvscaf001, state=planning, workingDirectory=/Users/codex/Projects/gemini-mission-control-extension, completedFeatures=0, totalFeatures=0, sealedMilestones=[], milestonesWithValidationPlanned=[]",
+        "createdAt and updatedAt were present as ISO-8601 strings: 2026-03-12T21:50:04Z"
+      ]
+    },
+    {
+      "id": "VAL-FOUND-005",
+      "status": "pass",
+      "reason": "The scaffolded features.json contains a features array and passes uniqueness/schema checks for the initial empty state.",
+      "evidence": [
+        "jq . /Users/codex/.gemini-mc/missions/mis_utvscaf001/features.json exited 0",
+        "Python schema check confirmed features.json is an object containing a features array",
+        "Python uniqueness check reported FEATURES_SCHEMA_OK for the empty features array"
+      ]
+    },
+    {
+      "id": "VAL-FOUND-012",
+      "status": "pass",
+      "reason": "All shell scripts in scope had executable permissions, the required bash shebang, valid bash syntax, and scaffold-mission.sh successfully created the expected structure.",
+      "evidence": [
+        "Checked executable bit and shebang for /Users/codex/Projects/gemini-mission-control-extension/.factory/init.sh, scripts/scaffold-mission.sh, scripts/session-context.sh, and scripts/validate-state.sh",
+        "All inspected scripts had mode 0755 and first line #!/usr/bin/env bash",
+        "bash -n passed for all .sh files in the repository and .factory/init.sh",
+        "scaffold-mission.sh execution produced the expected mission scaffold at /Users/codex/.gemini-mc/missions/mis_utvscaf001"
+      ]
+    },
+    {
+      "id": "VAL-FOUND-016",
+      "status": "fail",
+      "reason": "The scaffold includes messages.jsonl, but the repository does not contain the mission-orchestrator skill instructions specifying the messages.jsonl write format with timestamp, sender, type, and content fields.",
+      "evidence": [
+        "Verified /Users/codex/.gemini-mc/missions/mis_utvscaf001/messages.jsonl exists and is initially empty",
+        "Attempt to read /Users/codex/Projects/gemini-mission-control-extension/skills/mission-orchestrator/SKILL.md failed because the file does not exist",
+        "LS of /Users/codex/Projects/gemini-mission-control-extension/skills showed only .gitkeep",
+        "Grep for message format terms (messages.jsonl, timestamp, sender, type, content) in project markdown did not find orchestrator skill instructions"
+      ]
+    }
+  ],
+  "toolsUsed": [
+    "Read",
+    "LS",
+    "Glob",
+    "Grep",
+    "Execute",
+    "Create"
+  ],
+  "frictions": [
+    {
+      "description": "The repo root did not contain README.md, so README-equivalent context had to be taken from GEMINI.md and mission AGENTS guidance.",
+      "resolved": true,
+      "resolution": "Used GEMINI.md plus mission/user-testing guidance to establish expected behavior.",
+      "affectedAssertions": [
+        "VAL-FOUND-003",
+        "VAL-FOUND-004",
+        "VAL-FOUND-005",
+        "VAL-FOUND-012",
+        "VAL-FOUND-016"
+      ]
+    }
+  ],
+  "blockers": [],
+  "summary": "Tested 5 foundation scaffold assertions against the Gemini CLI extension shell-script surface using isolated mission mis_utvscaf001. Four assertions passed (VAL-FOUND-003, 004, 005, 012) and one failed (VAL-FOUND-016) because messages.jsonl is scaffolded but the mission-orchestrator skill instructions and message field contract are missing from the repository."
+}

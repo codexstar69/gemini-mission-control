@@ -1,0 +1,79 @@
+{
+  "groupId": "foundation-manifest",
+  "surface": "gemini-cli-extension",
+  "testedAt": "2026-03-12T21:50:24Z",
+  "credentials": {
+    "account": "local-validator-manifest",
+    "namespace": "utv-foundation-manifest"
+  },
+  "assertionsTested": [
+    "VAL-FOUND-001",
+    "VAL-FOUND-002",
+    "VAL-FOUND-013"
+  ],
+  "assertionResults": [
+    {
+      "id": "VAL-FOUND-001",
+      "status": "pass",
+      "reason": "gemini-extension.json parsed as valid JSON and the real Gemini CLI accepted the extension link command from the project path with exit code 0.",
+      "evidence": [
+        "jq . /Users/codex/Projects/gemini-mission-control-extension/gemini-extension.json exited 0 and printed the expected required fields: name, version, description, contextFileName, commandsDir, skillsDir, hooksDir.",
+        "gemini --version returned 0.33.0, confirming the real CLI surface was available.",
+        "gemini extensions link /Users/codex/Projects/gemini-mission-control-extension exited with code 0 and printed installation/linking messages for extension 'gemini-mission-control'."
+      ]
+    },
+    {
+      "id": "VAL-FOUND-002",
+      "status": "pass",
+      "reason": "The manifest-referenced GEMINI.md file exists, is 241 lines long, and contains all required user-visible sections defining the orchestrator contract.",
+      "evidence": [
+        "test -f /Users/codex/Projects/gemini-mission-control-extension/GEMINI.md passed.",
+        "wc -l /Users/codex/Projects/gemini-mission-control-extension/GEMINI.md reported 241 lines (>= 50).",
+        "Section headings found: ## 1. Project Description, ## 2. Orchestrator Identity, ## 3. State Management Protocol, ## 4. Available Commands, ## 5. Available Agents, ## 7. State Machine.",
+        "Manual/targeted inspection confirmed state management file-tool guidance (read_file/write_file/replace), command listing, agent listing, and valid state names planning/orchestrator_turn/worker_running/handoff_review/paused/completed/failed."
+      ]
+    },
+    {
+      "id": "VAL-FOUND-013",
+      "status": "pass",
+      "reason": "All manifest path references resolve within the extension directory without broken links.",
+      "evidence": [
+        "Manifest values observed: contextFileName=GEMINI.md, commandsDir=commands, skillsDir=skills, hooksDir=hooks.",
+        "test -f /Users/codex/Projects/gemini-mission-control-extension/GEMINI.md passed.",
+        "test -d /Users/codex/Projects/gemini-mission-control-extension/commands passed and LS showed the command files.",
+        "test -d /Users/codex/Projects/gemini-mission-control-extension/skills passed.",
+        "test -d /Users/codex/Projects/gemini-mission-control-extension/hooks passed and LS showed hooks.json."
+      ]
+    }
+  ],
+  "toolsUsed": [
+    "Read",
+    "LS",
+    "Grep",
+    "Execute",
+    "jq",
+    "gemini"
+  ],
+  "frictions": [
+    {
+      "description": "README.md was absent at the repo root, so initial codebase exploration had to fall back to GEMINI.md plus mission/testing guidance.",
+      "resolved": true,
+      "resolution": "Used GEMINI.md, mission AGENTS.md, and user-testing.md as the primary context sources.",
+      "affectedAssertions": [
+        "VAL-FOUND-001",
+        "VAL-FOUND-002",
+        "VAL-FOUND-013"
+      ]
+    },
+    {
+      "description": "gemini extensions link displayed an interactive trust/continue prompt even though it completed with exit code 0 in this environment.",
+      "resolved": true,
+      "resolution": "Recorded the real CLI output and relied on the successful exit code plus install/link messages as user-visible evidence.",
+      "affectedAssertions": [
+        "VAL-FOUND-001"
+      ]
+    }
+  ],
+  "blockers": [],
+  "summary": "Tested 3 assigned foundation assertions through the real Gemini CLI and direct filesystem checks. VAL-FOUND-001, VAL-FOUND-002, and VAL-FOUND-013 all passed; manifest JSON is valid, extension linking succeeded with exit code 0, GEMINI.md contains the required orchestrator sections, and every manifest-referenced path resolves correctly."
+}

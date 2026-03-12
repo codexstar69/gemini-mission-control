@@ -1,0 +1,127 @@
+{
+  "surface": "gemini-cli-extension",
+  "groupId": "foundation-commands",
+  "testedAt": "2026-03-13T00:00:00Z",
+  "credentials": {
+    "account": "local-validator-commands",
+    "namespace": "utv-foundation-commands"
+  },
+  "assertionsTested": [
+    "VAL-FOUND-006",
+    "VAL-FOUND-007",
+    "VAL-FOUND-008",
+    "VAL-FOUND-009",
+    "VAL-FOUND-010",
+    "VAL-FOUND-011",
+    "VAL-FOUND-014"
+  ],
+  "toolsUsed": [
+    "Read",
+    "LS",
+    "Execute",
+    "jq",
+    "python3",
+    "gemini"
+  ],
+  "assertionResults": [
+    {
+      "id": "VAL-FOUND-006",
+      "status": "pass",
+      "reason": "All nine command TOML files parsed successfully with non-empty prompt strings and descriptions present.",
+      "evidence": [
+        "python3 tomllib validation across /commands/*.toml exited 0",
+        "Each file reported ok=true for required prompt field",
+        "Command prompts reference mission/state operations"
+      ]
+    },
+    {
+      "id": "VAL-FOUND-007",
+      "status": "fail",
+      "reason": "The agents/ directory contains no .md agent definition files, so required frontmatter and valid tool-name checks cannot pass.",
+      "evidence": [
+        "LS of /agents showed only .gitkeep",
+        "Agent frontmatter inspection found agentFiles=0"
+      ]
+    },
+    {
+      "id": "VAL-FOUND-008",
+      "status": "pass",
+      "reason": "Running /mission-start through Gemini CLI created namespaced missions mis_076af0 and mis_ddaac4 with state.json set to planning and empty features.json.",
+      "evidence": [
+        "gemini -p /mission-start returned Mission ID mis_076af0 and planning confirmation",
+        "Mission directories ~/.gemini-mc/missions/mis_076af0 and mis_ddaac4 were created",
+        "state.json for both missions contains state=planning",
+        "features.json for mis_076af0 contains an empty features array"
+      ]
+    },
+    {
+      "id": "VAL-FOUND-009",
+      "status": "fail",
+      "reason": "The real /mission-status user flow did not reliably display the specified status output; explicit-ID output omitted current milestone, and no-arg status returned an explanation about a missing cli.ts instead of mission state.",
+      "evidence": [
+        "gemini -p /mission-status mis_076af0 reported missionId/state/workingDirectory/progress timestamps but no current milestone field",
+        "gemini -p /mission-status returned a message about missing /Users/codex/gemini-mission-control/src/cli.ts instead of current mission status",
+        "Direct state.json read confirms the mission data exists and is readable"
+      ]
+    },
+    {
+      "id": "VAL-FOUND-010",
+      "status": "pass",
+      "reason": "The real /mission-list flow listed all missions with mission ID, state, and updated time, including the two namespace missions created for this validator; ordering matched descending updatedAt from state.json files.",
+      "evidence": [
+        "gemini -p /mission-list displayed rows for mis_ddaac4 and mis_076af0 with planning state and timestamps",
+        "Direct Python verification of ~/.gemini-mc/missions/*/state.json showed descending updatedAt order matching the listed missions",
+        "mission-list.toml prompt specifies listing missionId/state/updatedAt from state.json"
+      ]
+    },
+    {
+      "id": "VAL-FOUND-011",
+      "status": "pass",
+      "reason": "hooks/hooks.json is valid JSON using a SessionStart hook that invokes scripts/session-context.sh.",
+      "evidence": [
+        "jq . hooks/hooks.json exited 0",
+        "Parsed hookEvents=[SessionStart]",
+        "Session start command target is scripts/session-context.sh"
+      ]
+    },
+    {
+      "id": "VAL-FOUND-014",
+      "status": "pass",
+      "reason": "Exactly the required nine command TOML files exist and the actual set matches the contract exactly.",
+      "evidence": [
+        "Python filename check reported count=9",
+        "Actual filenames matched the expected required set exactly",
+        "All nine files also passed TOML parsing validation"
+      ]
+    }
+  ],
+  "frictions": [
+    {
+      "description": "Headless gemini command runs emitted unrelated MCP discovery errors and noisy warnings before the command response.",
+      "resolved": true,
+      "resolution": "Ignored the noise and evaluated the final command output plus mission artifacts on disk.",
+      "affectedAssertions": [
+        "VAL-FOUND-008",
+        "VAL-FOUND-009",
+        "VAL-FOUND-010"
+      ]
+    },
+    {
+      "description": "CLI responses for /mission-status and /mission-list referenced a nonexistent ~/gemini-mission-control/src/cli.ts path and, for no-arg status, did not execute the intended mission-status behavior cleanly.",
+      "resolved": true,
+      "resolution": "Verified the observable CLI output and cross-checked state.json files directly to determine whether the contract was satisfied.",
+      "affectedAssertions": [
+        "VAL-FOUND-009",
+        "VAL-FOUND-010"
+      ]
+    },
+    {
+      "description": "README.md was absent in the repo root even though mission guidance referenced it, so GEMINI.md served as the README-equivalent for initial project-context review.",
+      "resolved": true,
+      "resolution": "Read GEMINI.md and mission/user-testing guidance before validation work.",
+      "affectedAssertions": []
+    }
+  ],
+  "blockers": [],
+  "summary": "Tested 7 foundation assertions for command files, hooks, agents, and real CLI command behavior. Passed: VAL-FOUND-006, 008, 010, 011, 014. Failed: VAL-FOUND-007 because no agent markdown files exist, and VAL-FOUND-009 because /mission-status behavior did not reliably satisfy the contract."
+}

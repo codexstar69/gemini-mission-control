@@ -33,3 +33,13 @@ Testing surface: tools, URLs, setup steps, isolation notes, known quirks.
 - Agent names must be lowercase with hyphens/underscores only
 - `google_web_search` is the correct tool name (not `web_search`)
 - Hooks use JSON format (`hooks.json`), not TOML
+
+## Flow Validator Guidance: gemini-cli-extension
+
+- Use the real Gemini CLI surface from `/Users/codex/Projects/gemini-mission-control-extension`; do not simulate command behavior by only reading files when a CLI flow can be exercised directly.
+- Preferred command pattern for headless checks: `gemini -p "<prompt>" -y --approval-mode yolo -e gemini-mission-control` from the project root after ensuring the extension is linked.
+- Isolate parallel runs by assigning each validator a unique mission/data namespace, such as distinct mission descriptions or explicit mission IDs/prefixes in any created artifacts under `~/.gemini-mc/missions/`.
+- Do not modify or delete pre-existing missions in `~/.gemini-mc/missions/`; validators may create new missions but should only inspect or reference the ones in their assigned namespace.
+- For `/mission-list`, validate that the assigned namespace missions appear with correct state ordering/fields rather than asserting exact global mission counts, because other missions may already exist.
+- No browser automation is needed; CLI output plus direct inspection of generated mission files with `jq`, `python3 -c 'import tomllib'`, and shell checks is the correct evidence surface.
+- When a command cannot be exercised non-interactively, fall back to validating the generated artifacts and prompt behavior as closely as possible, and record the limitation explicitly in the flow report.
