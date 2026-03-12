@@ -1,0 +1,88 @@
+{
+  "milestone": "foundation",
+  "round": 1,
+  "status": "fail",
+  "validatorsRun": {
+    "test": {
+      "passed": true,
+      "command": "cd /Users/codex/Projects/gemini-mission-control-extension && python3 - <<'PY'\nfrom pathlib import Path\nimport os, subprocess, json\nroot = Path('.')\nmid = 'scrutinyfoundationtmp'\nmission_dir = Path.home()/'.gemini-mc'/'missions'/f'mis_{mid}'\nif mission_dir.exists():\n    subprocess.run(['rm','-rf', str(mission_dir)], check=True)\nsubprocess.run(['./scripts/scaffold-mission.sh', mid, str(root.resolve())], check=True)\nsubprocess.run(['./scripts/validate-state.sh', str(mission_dir/'state.json')], check=True)\nprint(json.dumps({'mission_dir': str(mission_dir), 'state_exists': (mission_dir/'state.json').exists(), 'features_exists': (mission_dir/'features.json').exists(), 'messages_exists': (mission_dir/'messages.jsonl').exists()}))\nPY",
+      "exitCode": 0
+    },
+    "typecheck": {
+      "passed": true,
+      "command": "cd /Users/codex/Projects/gemini-mission-control-extension && python3 - <<'PY'\nfrom pathlib import Path\nimport tomllib\nfor path in sorted(Path('commands').glob('*.toml')):\n    with path.open('rb') as f:\n        data = tomllib.load(f)\n    if not isinstance(data.get('prompt'), str) or not data['prompt'].strip():\n        raise SystemExit(f'missing prompt: {path}')\nprint('validated', len(list(Path('commands').glob('*.toml'))), 'command files')\nPY && jq . hooks/hooks.json && python3 - <<'PY'\nfrom pathlib import Path\nimport re\nvalid = {'read_file','write_file','replace','run_shell_command','grep_search','list_directory','google_web_search','web_fetch','glob','read_many_files'}\nfor path in sorted(Path('agents').glob('*.md')):\n    text = path.read_text()\n    if not text.startswith('---\\n'):\n        raise SystemExit(f'missing frontmatter: {path}')\n    _, fm, _ = text.split('---', 2)\n    if 'kind: local' not in fm:\n        raise SystemExit(f'wrong kind: {path}')\n    tools = []\n    in_tools = False\n    for line in fm.splitlines():\n        if line.startswith('tools:'):\n            in_tools = True\n            continue\n        if in_tools:\n            if re.match(r'^[A-Za-z_]', line):\n                in_tools = False\n            elif line.strip().startswith('- '):\n                tools.append(line.strip()[2:])\n    bad = [t for t in tools if t not in valid]\n    if bad:\n        raise SystemExit(f'invalid tools in {path}: {bad}')\nprint('agent frontmatter validated')\nPY",
+      "exitCode": 0
+    },
+    "lint": {
+      "passed": true,
+      "command": "cd /Users/codex/Projects/gemini-mission-control-extension && jq . gemini-extension.json && for f in scripts/*.sh; do test -x \"$f\" && bash -n \"$f\" && echo \"$f\"; done && gemini extensions link .",
+      "exitCode": 0
+    }
+  },
+  "reviewsSummary": {
+    "total": 6,
+    "passed": 2,
+    "failed": 4,
+    "failedFeatures": [
+      "extension-manifest-and-structure",
+      "scaffold-script-and-state-schema",
+      "basic-commands",
+      "remaining-commands-toml"
+    ]
+  },
+  "blockingIssues": [
+    {
+      "featureId": "scaffold-script-and-state-schema",
+      "severity": "blocking",
+      "description": "scripts/validate-state.sh only checks that createdAt and updatedAt are strings, so invalid non-ISO-8601 timestamps still pass validation."
+    },
+    {
+      "featureId": "scaffold-script-and-state-schema",
+      "severity": "blocking",
+      "description": "scripts/scaffold-mission.sh interpolates workingDirectory into JSON without escaping, which can produce invalid state.json for quoted, backslash-containing, or multiline paths."
+    },
+    {
+      "featureId": "basic-commands",
+      "severity": "blocking",
+      "description": "commands/mission-status.toml falls back to directory mtime when selecting the most recent mission, so it can report the wrong mission instead of using state.json updatedAt as required."
+    }
+  ],
+  "appliedUpdates": [
+    {
+      "target": "library",
+      "description": "Updated .factory/library/environment.md to state that shellcheck is not installed and bash -n is the supported shell validation command in this environment.",
+      "sourceFeature": "hooks-and-agents-format"
+    }
+  ],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "AGENTS.md",
+      "suggestion": "Document that feature skillName values may correspond to project-local skills under .factory/skills/, and tell workers exactly where to look before concluding a skill is unavailable.",
+      "evidence": "Reviews for extension-manifest-and-structure, gemini-md-context, scaffold-script-and-state-schema, basic-commands, and remaining-commands-toml all observed workers claiming extension-builder was unavailable even though .factory/skills/extension-builder/SKILL.md exists.",
+      "isSystemic": true
+    },
+    {
+      "target": "skills",
+      "suggestion": "Update worker/build skills so shell script verification explicitly uses bash -n in this repo instead of attempting shellcheck discovery.",
+      "evidence": "The hooks-and-agents-format review found the worker attempted a shellcheck path even though mission guidance says shellcheck is not installed; this caused unnecessary divergence from the repo's supported verification workflow.",
+      "isSystemic": true
+    },
+    {
+      "target": "skills",
+      "suggestion": "Clarify that handoffs and review summaries must record exact commands that succeeded, including any uninstall/retry steps, rather than simplified equivalents.",
+      "evidence": "The extension-manifest-and-structure and remaining-commands-toml reviews found inaccurate handoff claims about skill availability and the exact gemini extensions link sequence, reducing confidence in execution records.",
+      "isSystemic": true
+    }
+  ],
+  "rejectedObservations": [
+    {
+      "observation": "services.yaml only exposes primitive validators and no single project-level validation command",
+      "reason": "rejected as ambiguous; the current additive validator commands are factually correct for this declarative repo and the observation does not justify a safe automated change without orchestrator direction."
+    },
+    {
+      "observation": "Repeated reports that extension-builder was unavailable despite existing in .factory/skills/extension-builder/SKILL.md",
+      "reason": "deduplicated into a single systemic guidance recommendation rather than repeating it as multiple separate findings."
+    }
+  ],
+  "previousRound": null
+}

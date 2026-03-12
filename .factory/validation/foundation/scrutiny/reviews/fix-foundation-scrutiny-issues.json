@@ -1,0 +1,26 @@
+{
+  "featureId": "fix-foundation-scrutiny-issues",
+  "reviewedAt": "2026-03-13T00:00:00Z",
+  "commitId": "04eac0b",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Commit 04eac0b adequately resolves the three blocking scrutiny findings from the earlier foundation reviews. scripts/validate-state.sh now enforces an ISO-8601 timestamp pattern for createdAt and updatedAt, scripts/scaffold-mission.sh now serializes state.json through Python JSON generation instead of unsafe shell interpolation, and commands/mission-status.toml now instructs the model to choose the latest mission by comparing state.json updatedAt values rather than directory mtime.",
+    "issues": []
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "The worker again reported that the extension-builder skill name did not match an installed runtime skill even though the repository contains a project-local extension-builder skill file. This looks like an ongoing shared-state/runtime-discovery mismatch rather than a problem with the code fix itself.",
+      "evidence": "The handoff at /Users/codex/.factory/missions/9e5cdf43-7a7b-4e1b-b796-31b974feb42a/handoffs/2026-03-12T21-34-57-575Z__fix-foundation-scrutiny-issues__5dabb5ad-fee5-4e81-ba0c-8a33b639e529.json records the suggestion 'The extension-builder skill name didn't match any installed skill', while /Users/codex/Projects/gemini-mission-control-extension/.factory/skills/extension-builder/SKILL.md exists."
+    }
+  ],
+  "addressesFailureFrom": [
+    "/Users/codex/Projects/gemini-mission-control-extension/.factory/validation/foundation/scrutiny/reviews/extension-manifest-and-structure.json",
+    "/Users/codex/Projects/gemini-mission-control-extension/.factory/validation/foundation/scrutiny/reviews/scaffold-script-and-state-schema.json",
+    "/Users/codex/Projects/gemini-mission-control-extension/.factory/validation/foundation/scrutiny/reviews/basic-commands.json",
+    "/Users/codex/Projects/gemini-mission-control-extension/.factory/validation/foundation/scrutiny/reviews/remaining-commands-toml.json"
+  ],
+  "summary": "Reviewed the fix feature metadata, transcript skeleton, handoff, commit 04eac0b, and the modified files against the prior foundation scrutiny failures. The fix fully addresses the three original blocking code issues, so this re-run passes; the only remaining note is a non-blocking shared-state observation about project-local skill discovery in the worker record."
+}
