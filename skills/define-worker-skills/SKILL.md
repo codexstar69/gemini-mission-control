@@ -308,7 +308,7 @@ Every worker MUST produce a structured handoff in the following format at the en
 | `verification.interactiveChecks` | No | For UI/browser work, describe what you clicked and saw. |
 | `tests.added` | Yes | Array of test files added, with test case names and what they verify. Empty array if no tests. |
 | `tests.coverage` | Yes | Summary of test coverage. |
-| `discoveredIssues` | Yes | Array of issues found. Empty array if none. Severity: `blocking`, `non_blocking`, or `suggestion`. |
+| `discoveredIssues` | Yes | Array of issues found. Empty array if none. Severity: `blocking` or `non_blocking`. |
 
 ### Handoff Rules
 
