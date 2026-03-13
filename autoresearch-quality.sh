@@ -191,7 +191,33 @@ for agent in agents/*.md; do
 done
 
 echo ""
-echo "=== 21. VALIDATE STATE SCRIPT ==="
+echo "=== 21. ORCHESTRATOR: Option A + incomplete clarification ==="
+check_present "$ORCH" "high-severity.*incomplete|high.*non-empty.*whatWasLeftUndone|high-severity.*Option B" "Option A + incomplete → Option B fallback"
+
+echo ""
+echo "=== 22. HOOKS: SessionStart hook exists ==="
+if [ -f "hooks/hooks.json" ]; then
+  if rg -q "SessionStart" "hooks/hooks.json" 2>/dev/null; then
+    pass "SessionStart hook configured"
+  else
+    fail "hooks.json missing SessionStart"
+  fi
+else
+  fail "hooks/hooks.json missing"
+fi
+
+echo ""
+echo "=== 23. SCRIPTS: All scripts executable ==="
+for script in scripts/scaffold-mission.sh scripts/session-context.sh scripts/validate-state.sh; do
+  if [ -x "$script" ]; then
+    pass "$script is executable"
+  else
+    warn "$script is not executable"
+  fi
+done
+
+echo ""
+echo "=== 24. VALIDATE STATE SCRIPT ==="
 if bash scripts/validate-state.sh 076af0 2>&1 | rg -q "VALID"; then
   pass "validate-state.sh passes on test mission"
 else
