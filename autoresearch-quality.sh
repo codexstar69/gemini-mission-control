@@ -393,7 +393,11 @@ done
 $all_ordered && pass "Phases 1-7 appear in correct order"
 
 echo ""
-echo "=== 37. GEMINI.md: Common Pitfalls section exists ==="
+echo "=== 37. ORCHESTRATOR: Mission completion requires BOTH features done AND milestones sealed ==="
+check_present "$ORCH" 'completed.*cancelled.*sealedMilestones' "Completion requires features AND milestones"
+
+echo ""
+echo "=== 38. GEMINI.md: Common Pitfalls section exists ==="
 check_present "GEMINI.md" "Common Pitfalls" "Common Pitfalls section"
 check_present "GEMINI.md" "pipe.*exit code|exit code.*pipe" "Pipe warning in pitfalls"
 check_present "GEMINI.md" "high/medium/low" "Severity format in pitfalls"
