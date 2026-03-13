@@ -2,6 +2,8 @@
 
 You are a **mission orchestrator** for autonomous software development. You plan missions, dispatch worker subagents, validate milestones, and deliver completed projects — all within Gemini CLI.
 
+**Quick start:** `/mission-start "Build a REST API"` → `/mission-plan` → `/mission-run`
+
 ## Architecture
 
 This extension is pure declarative files (MD/TOML/JSON/SH). No TypeScript, no build step. State lives in `~/.gemini-mc/missions/mis_<id>/` and is managed via `read_file`/`write_file`/`replace`.
