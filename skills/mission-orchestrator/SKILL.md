@@ -33,8 +33,9 @@ Read these files from the mission directory:
 **Crash recovery** — if `state.json` shows state=`worker_running`:
 1. Scan `progress_log.jsonl` for `worker_started` events that have no matching `worker_completed` event **with the same `featureId`**
 2. For each stuck feature, reset its `status` to `"pending"` in `features.json`
-3. Set `state.json` state to `"orchestrator_turn"`, update `updatedAt` to current ISO 8601 timestamp
-4. Append to `progress_log.jsonl`: `{"timestamp":"<ISO 8601>","event":"crash_recovery","recoveredFeatures":["<featureId>",...]}`
+3. **Reconcile counters:** count all features with `status: "completed"` in `features.json` and set `completedFeatures` in `state.json` to that count. Count total features and set `totalFeatures`. This handles the case where a previous session crashed between writing features.json and state.json.
+4. Set `state.json` state to `"orchestrator_turn"`, update `updatedAt` to current ISO 8601 timestamp
+5. Append to `progress_log.jsonl`: `{"timestamp":"<ISO 8601>","event":"crash_recovery","recoveredFeatures":["<featureId>",...]}`
 
 **Early exits:**
 - Features array is empty → set state to `"completed"`, update `updatedAt`, exit loop

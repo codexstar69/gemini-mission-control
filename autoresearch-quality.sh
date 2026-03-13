@@ -539,6 +539,14 @@ else
 fi
 
 echo ""
+echo "=== 54. ORCHESTRATOR: Crash recovery reconciles counters ==="
+if grep -q "Reconcile counters\|reconcil" "$ORCH" 2>/dev/null; then
+  pass "Crash recovery reconciles completedFeatures/totalFeatures"
+else
+  fail "Crash recovery does not reconcile counters — mid-crash state drift possible"
+fi
+
+echo ""
 echo "=== SUMMARY ==="
 echo "Errors: $ERRORS"
 echo "Warnings: $WARNINGS"
