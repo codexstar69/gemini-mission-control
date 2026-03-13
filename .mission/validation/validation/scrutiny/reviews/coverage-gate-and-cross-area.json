@@ -1,0 +1,45 @@
+{
+  "featureId": "coverage-gate-and-cross-area",
+  "reviewedAt": "2026-03-13T06:10:00Z",
+  "commitId": "9cf5b5b",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The implementation adequately addresses coverage gate enforcement, cross-session persistence, and session restart hooks. Three files were modified: skills/mission-planner/SKILL.md, GEMINI.md, and scripts/session-context.sh. The planner skill now has an explicit 'Pre-Transition Coverage Gate Verification (MANDATORY)' subsection in Section 7.7 that re-checks for orphan, duplicate, and phantom assertion IDs before allowing the planning→orchestrator_turn state transition, with a clear STOP instruction if any check fails. GEMINI.md documents cross-session persistence (Section 8) covering how state persists, session startup hook behavior, cross-session command behavior table, and crash recovery. The session-context.sh script was enhanced with mission directory output and state-based next-action suggestions. The orchestrator skill (not modified by this feature, but already contains VAL-CROSS-003 and VAL-CROSS-004 coverage via the mission-orchestrator-skill feature) has a clear skillName-to-agent mapping table in Section 3.4 and explicit worker prompt enrichment referencing all four .mission/ sources in Section 3.2. One non-blocking issue was found in session-context.sh.",
+    "issues": [
+      {
+        "file": "scripts/session-context.sh",
+        "line": 42,
+        "severity": "non_blocking",
+        "description": "Dead code in updatedAt handling: The script extracts 'updatedAt' from state.json but both the if-branch (updatedAt missing) and the else-branch (updatedAt present) execute identical file mtime logic. The comment says 'Convert ISO 8601 to epoch for comparison (use file mtime as proxy)' but this means the updatedAt value is read and then ignored. The code works correctly (file mtime is a reasonable proxy since write_file updates mtime), but the else-branch is misleading dead logic that suggests an incomplete implementation."
+      },
+      {
+        "file": "skills/mission-planner/SKILL.md",
+        "line": 567,
+        "severity": "non_blocking",
+        "description": "The pre-transition coverage gate verification is a re-check of the same gate from Section 7.6 (Coverage Gate). While defense-in-depth is valuable, the instructions don't explain what could change between the initial check (after writing features.json) and this re-check (before state transition). Since both reads happen within the same planning session and the planner writes both files, the re-check adds procedural overhead without addressing a concrete failure mode. Not blocking since it's strictly safer to check twice."
+      },
+      {
+        "file": "features.json (mission)",
+        "line": 0,
+        "severity": "non_blocking",
+        "description": "Feature fulfills array mismatch: The feature claims fulfills: [VAL-CROSS-005, VAL-CROSS-001, VAL-CROSS-002]. The task assignment says it should satisfy VAL-CROSS-003, VAL-CROSS-004, VAL-CROSS-005, and VAL-CROSS-002. However, VAL-CROSS-003 and VAL-CROSS-004 are correctly claimed by the 'mission-orchestrator-skill' feature (which already implemented skillName-to-agent mapping and worker enrichment). VAL-CROSS-001 (full lifecycle) was added to this feature's fulfills but the feature description says to 'review and update' the orchestrator skill — the worker only added documentation in GEMINI.md and session-context.sh, which partially addresses VAL-CROSS-001's session persistence aspects but doesn't constitute full lifecycle testing. Not blocking since the assertions are covered across features."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "Worker was assigned skillName 'extension-builder' but the skill is located at '.factory/skills/extension-builder/SKILL.md' (Factory's internal skill directory), not in the project's 'skills/' directory or '.mission/skills/'. The worker's skillFeedback confirms it couldn't find the skill and fell back to mission-worker-base procedures. This is a recurring pattern: the planner assigns 'extension-builder' as the skillName but the orchestrator's skillName-to-agent mapping (Section 3.4) doesn't include 'extension-builder' in its mapping table. The fallback to mission-worker works, but the planner should either use a skillName that maps to a known agent or the orchestrator should document how Factory-internal skills map.",
+      "evidence": "Feature skillName is 'extension-builder'. Orchestrator SKILL.md Section 3.4 maps: mission-worker, code-quality-worker, scrutiny-validator, user-testing-validator. 'extension-builder' is not in this list. Worker transcript: 'The skill extension-builder does not exist as a registered skill. I followed the mission-worker-base procedures.' The skill file exists at .factory/skills/extension-builder/SKILL.md but the worker couldn't locate it."
+    },
+    {
+      "area": "conventions",
+      "observation": "The session-context.sh script outputs structured context markers ('=== Active Mission Context (reloaded from disk) ===' and '=== End Mission Context ===') but GEMINI.md and AGENTS.md don't document how the model should parse or use this context. It's unclear whether Gemini CLI injects this as system context or user context, and whether the model should look for these markers.",
+      "evidence": "scripts/session-context.sh lines 82 and 101: echo markers. GEMINI.md Section 8.2 describes what the script does but not how the output integrates into the model's context window."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "PASS. The coverage gate enforcement is well-implemented with a mandatory pre-transition verification step in the planner skill that blocks the planning→orchestrator_turn transition if any VAL ID is orphaned, duplicated, or phantom. GEMINI.md now thoroughly documents cross-session persistence including the session startup hook, state persistence mechanism, crash recovery, and a helpful command behavior table. The session-context.sh enhancement adds useful state-based next-action suggestions. The skillName-to-agent mapping and worker prompt enrichment were already adequately specified in the orchestrator skill (by the mission-orchestrator-skill feature). Two non-blocking issues found: (1) dead code in session-context.sh's updatedAt handling, (2) the redundant coverage gate re-check could benefit from a rationale explaining what failure mode it guards against. One shared state observation about the extension-builder skill mapping gap warrants attention."
+}

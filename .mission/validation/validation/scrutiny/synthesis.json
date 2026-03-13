@@ -1,0 +1,110 @@
+{
+  "milestone": "validation",
+  "round": 1,
+  "status": "pass",
+  "validatorsRun": {
+    "json": {
+      "passed": true,
+      "command": "jq . gemini-extension.json hooks/hooks.json",
+      "exitCode": 0
+    },
+    "toml": {
+      "passed": true,
+      "command": "python3 -c \"import tomllib; tomllib.load(open('<file>','rb'))\" for each commands/*.toml",
+      "exitCode": 0
+    },
+    "shell-syntax": {
+      "passed": true,
+      "command": "bash -n scripts/*.sh",
+      "exitCode": 0
+    },
+    "agent-frontmatter": {
+      "passed": true,
+      "command": "python3 YAML parse + tool validation for agents/*.md",
+      "exitCode": 0
+    },
+    "skill-frontmatter": {
+      "passed": true,
+      "command": "python3 YAML frontmatter parse for skills/*/SKILL.md",
+      "exitCode": 0
+    },
+    "extension-link": {
+      "passed": true,
+      "command": "cd /Users/codex/Projects/gemini-mission-control-extension && gemini extensions link .",
+      "exitCode": 0
+    }
+  },
+  "reviewsSummary": {
+    "total": 3,
+    "passed": 3,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "nonBlockingIssues": [
+    {
+      "featureId": "validator-agent-definitions",
+      "severity": "non_blocking",
+      "description": "Example synthesis report JSON in both agents/scrutiny-validator.md and agents/user-testing-validator.md hardcodes \"milestone\": \"validation\" rather than using a <milestone> placeholder."
+    },
+    {
+      "featureId": "validation-orchestration",
+      "severity": "non_blocking",
+      "description": "Section 8.3 sealing trigger condition says 'After a user-testing-validator-<milestone> feature completes successfully' but doesn't explicitly state both validators must pass. Implicit from DAG dependency but could be more explicit."
+    },
+    {
+      "featureId": "validation-orchestration",
+      "severity": "non_blocking",
+      "description": "Override procedure step 2 uses 'status is pending' to identify failed validators, which is ambiguous — pending could mean not-yet-dispatched rather than failed."
+    },
+    {
+      "featureId": "validation-orchestration",
+      "severity": "non_blocking",
+      "description": "Mission selection via updatedAt comparison in mission-override.toml could be slow with many missions compared to filesystem-based approaches."
+    },
+    {
+      "featureId": "coverage-gate-and-cross-area",
+      "severity": "non_blocking",
+      "description": "Dead code in session-context.sh: updatedAt value is read from state.json but both branches use file mtime instead. The else-branch is misleading dead logic."
+    },
+    {
+      "featureId": "coverage-gate-and-cross-area",
+      "severity": "non_blocking",
+      "description": "Redundant coverage gate re-check in planner skill Section 7.7 re-runs the same validation from Section 7.6 without explaining what failure mode the re-check guards against."
+    }
+  ],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [
+    {
+      "target": "AGENTS.md",
+      "suggestion": "Add documentation that validation override does NOT change validation-state.json assertion statuses. Failed assertions remain failed; the override only affects validator feature status and milestone sealing. This convention should be visible to future workers and validators.",
+      "evidence": "SKILL.md line 855 documents this behavior but AGENTS.md does not mention it. The validation-orchestration review flagged this as a convention gap.",
+      "isSystemic": false
+    },
+    {
+      "target": "AGENTS.md",
+      "suggestion": "Document the skillName-to-agent mapping convention: when a feature's skillName doesn't match any agent in the orchestrator's mapping table (Section 3.4), the orchestrator falls back to mission-worker. The planner should prefer skillNames that map to known agents (mission-worker, code-quality-worker, scrutiny-validator, user-testing-validator).",
+      "evidence": "All 3 implementation features used skillName 'extension-builder' which isn't in the orchestrator's mapping table. Workers consistently fell back to base procedures. This is a systemic pattern across all features in the mission.",
+      "isSystemic": true
+    }
+  ],
+  "rejectedObservations": [
+    {
+      "observation": "Worker couldn't load 'extension-builder' skill via Skill tool at runtime",
+      "reason": "This is a Factory platform runtime issue (skill not found in worker's environment), not a project configuration issue. The skill exists at .factory/skills/extension-builder/SKILL.md but isn't loadable by workers. Outside the scope of this project's validation."
+    },
+    {
+      "observation": "Worker couldn't load 'mission-worker-base' skill via Skill tool at runtime",
+      "reason": "Same as above — Factory platform runtime skill loading issue, not a project issue."
+    },
+    {
+      "observation": "No test/typecheck/lint commands in services.yaml for this declarative extension project",
+      "reason": "This is by design — the project has no TypeScript, no test suite, no compiler. Validation is done via jq, python3 tomllib, gemini extensions link, and bash -n. Already documented in AGENTS.md."
+    },
+    {
+      "observation": "session-context.sh output markers not documented in GEMINI.md for model parsing",
+      "reason": "The output is handled by Gemini CLI's hook system (SessionStart event) and injected automatically. The model doesn't need to parse markers — the content is provided as context. Low-priority documentation gap, not actionable."
+    }
+  ],
+  "previousRound": null
+}

@@ -1,0 +1,44 @@
+{
+  "featureId": "validator-agent-definitions",
+  "reviewedAt": "2026-03-13T06:10:00.000Z",
+  "commitId": "8295fca",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "Both validator agent definition files are well-structured, complete, and satisfy all four validation contract assertions (VAL-VALID-001, VAL-VALID-002, VAL-VALID-006, VAL-VALID-008). Frontmatter is correct with valid names, kind: local, all valid Gemini CLI tool names, appropriate model/temperature/max_turns/timeout_mins values. The procedure bodies are comprehensive with clear phased instructions covering all required behaviors. No blocking issues found.",
+    "issues": [
+      {
+        "file": "agents/scrutiny-validator.md",
+        "line": 191,
+        "severity": "non_blocking",
+        "description": "The example synthesis report JSON hardcodes \"milestone\": \"validation\" rather than using a placeholder like \"<milestone>\". Since the agent is milestone-generic, a placeholder would be more instructive. Minor: unlikely to cause real issues since the body text repeatedly uses the <milestone> placeholder pattern elsewhere."
+      },
+      {
+        "file": "agents/user-testing-validator.md",
+        "line": 200,
+        "severity": "non_blocking",
+        "description": "Same as scrutiny-validator: the example synthesis JSON hardcodes \"milestone\": \"validation\" rather than \"<milestone>\". Consistent with the other agent, so not an inconsistency, but a minor documentation clarity issue."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "Worker was assigned skillName 'extension-builder' but the Skill tool returned 'Skill extension-builder not found'. The worker deviated and completed the feature manually. The skill file exists at .factory/skills/extension-builder/SKILL.md, so the skill is available in the project's Factory config, but was not loadable via the Skill tool in the worker's runtime. This is documented in the handoff's skillFeedback.deviations.",
+      "evidence": "Transcript shows: Tool: Skill { skill: 'extension-builder' } returned not-found. Handoff skillFeedback.followedProcedure: false, deviations[0]: 'The required extension-builder skill was not available in the environment'."
+    },
+    {
+      "area": "skills",
+      "observation": "Worker also attempted to invoke a 'mission-worker-base' skill (visible in transcript skeleton) which also was not found. The extension-builder skill references 'worker-base' for startup/cleanup handling. This skill loading failure pattern is recurring.",
+      "evidence": "Transcript skeleton shows first tool call: Skill { skill: 'mission-worker-base' } — this skill doesn't appear to exist in .factory/skills/."
+    },
+    {
+      "area": "conventions",
+      "observation": "The .factory/services.yaml only defines validation commands (validate-json, validate-extension, validate-toml, validate-shell) — no test, typecheck, or lint commands. The worker correctly identified this gap. When the scrutiny-validator agent runs against this project, it will find no test/typecheck/lint commands in .mission/services.yaml and will need to handle this correctly (the agent body does instruct recording missing commands as blocking gaps). This is by design for a declarative extension project but worth noting.",
+      "evidence": ".factory/services.yaml contents: commands: validate-json, validate-extension, validate-toml, validate-shell. No 'test', 'typecheck', or 'lint' entries."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "Feature passes review. Both agents/scrutiny-validator.md and agents/user-testing-validator.md are well-implemented with correct YAML frontmatter (name, kind: local, valid tool names, model: gemini-2.5-pro, appropriate temperature/max_turns/timeout_mins), comprehensive multi-phase procedures, correct synthesis report paths (.mission/validation/<milestone>/scrutiny/synthesis.json and .mission/validation/<milestone>/user-testing/synthesis.json), re-run logic that checks previous synthesis reports and scopes re-validation to failures only, and proper structured handoff protocols. All four assigned validation contract assertions (VAL-VALID-001, VAL-VALID-002, VAL-VALID-006, VAL-VALID-008) are satisfied. Only non-blocking issues found: minor hardcoded milestone name in example JSON snippets."
+}

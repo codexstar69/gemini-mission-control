@@ -1,0 +1,45 @@
+{
+  "featureId": "validation-orchestration",
+  "reviewedAt": "2026-03-13T01:15:00.000Z",
+  "commitId": "c221a4e",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The implementation correctly adds sealed milestone enforcement and validation override protocol to the mission-orchestrator skill, and enhances mission-override.toml with milestone sealing. All four validation contract assertions (VAL-VALID-003, VAL-VALID-004, VAL-VALID-005, VAL-VALID-007) are satisfied. The diff is clean: 111 insertions across 2 files with no regressions. Auto-injection was already correctly specified (verified, not modified). Sealed milestone enforcement is now documented in 4 explicit locations (Option A, Option D, Scope Change, general guard). The Validation Override Protocol is comprehensive with 9-step procedure and clear override rules. The mission-override.toml was enhanced with milestone sealing step and updatedAt-based mission selection.",
+    "issues": [
+      {
+        "file": "skills/mission-orchestrator/SKILL.md",
+        "line": 538,
+        "severity": "non_blocking",
+        "description": "Section 8.3 sealing trigger says 'After a user-testing-validator-<milestone> feature completes successfully' but doesn't explicitly state that BOTH validators must have passed. The dependency is implicitly correct (user-testing depends on scrutiny, so it can only run after scrutiny completes), but the sealing condition could be more explicit for clarity — e.g., 'After both scrutiny-validator and user-testing-validator features complete successfully'."
+      },
+      {
+        "file": "skills/mission-orchestrator/SKILL.md",
+        "line": 801,
+        "severity": "non_blocking",
+        "description": "Override procedure step 2 identifies failed validators by looking for 'status is pending (indicating a failed or blocked validation attempt)'. This is ambiguous — a pending validator may not have been dispatched yet, not just failed. The additional handoff file check helps disambiguate, but the wording could be more precise, e.g., 'status is pending after a dispatch attempt (check handoffs/ for a failed handoff)'."
+      },
+      {
+        "file": "commands/mission-override.toml",
+        "line": 9,
+        "severity": "non_blocking",
+        "description": "Mission selection approach was changed from filesystem mtime (ls -td) to reading each mission's state.json and comparing updatedAt. While more reliable, this could be slow with many missions. Acceptable for the current use case but worth noting as a potential optimization point."
+      }
+    ]
+  },
+  "sharedStateObservations": [
+    {
+      "area": "skills",
+      "observation": "Worker's skillName is 'extension-builder' but no such skill exists as a droid or personal skill. The worker correctly treated it as just a label and proceeded directly with implementation. The skill feedback confirms followedProcedure: true with a noted deviation for the missing skill invocation.",
+      "evidence": "Transcript shows: 'The extension-builder skill doesn't exist as a droid or personal skill... I followed the mission-worker-base startup procedure and implemented the feature directly.' Feature definition has skillName: 'extension-builder' but there is no .factory/skills/extension-builder/ or droids/extension-builder."
+    },
+    {
+      "area": "conventions",
+      "observation": "The override protocol in SKILL.md specifies that override does NOT change validation-state.json assertion statuses (line 855). This is a design decision that should be documented in AGENTS.md so future workers and validators understand that overridden milestones may still have failed assertions in validation-state.json.",
+      "evidence": "SKILL.md line 855: 'Override does NOT change validation-state.json assertion statuses. Failed assertions remain failed; the override only affects the validator feature status and milestone sealing.' This convention is not mentioned in AGENTS.md."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "The validation-orchestration feature passes review. The implementation correctly satisfies all 4 relevant validation contract assertions: VAL-VALID-003 (auto-injection with correct IDs and ordering was verified as already present), VAL-VALID-004 (sealed milestone enforcement added in 4 locations with logging and user notification), VAL-VALID-005 (validation-state.json tracking verified as covered in user-testing-validator.md), and VAL-VALID-007 (comprehensive override protocol added to SKILL.md with 9-step procedure, and mission-override.toml enhanced with milestone sealing). Three non-blocking issues were noted: implicit sealing trigger condition, ambiguous 'pending' status interpretation in override detection, and potential performance concern with mission selection approach. No blocking issues found."
+}
