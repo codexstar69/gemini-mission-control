@@ -7,7 +7,7 @@
           {
             "name": "load-active-mission-context",
             "type": "command",
-            "command": "scripts/session-context.sh",
+            "command": "${extensionPath}/scripts/session-context.sh",
             "timeout": 5000,
             "description": "Loads active mission context on session start for cross-session persistence"
           }
