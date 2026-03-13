@@ -90,7 +90,7 @@ Build an enriched prompt for the worker agent. Structure the prompt clearly with
 
 ## Step 5: Parse Structured Handoff
 
-The worker's response should end with a JSON code block containing the handoff. Extract this JSON.
+The worker's response ends with a JSON code block containing the handoff. Find the **last** JSON code block in the response (workers produce the handoff as their final output). Parse it as the handoff.
 
 **Required handoff fields:**
 - `salientSummary` — string, non-empty, 1–4 sentences
