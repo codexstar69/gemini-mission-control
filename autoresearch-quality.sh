@@ -405,6 +405,71 @@ check_present "GEMINI.md" "sealed.*immutable|immutable.*sealed" "Sealed mileston
 check_present "GEMINI.md" "[Cc]ancelled.*satisfy|cancelled.*precondition" "Cancelled preconditions in pitfalls"
 
 echo ""
+echo "=== 39. HOOKS: hooks.json is valid JSON ==="
+if python3 -c "import json; json.load(open('hooks/hooks.json'))" 2>/dev/null; then
+  pass "hooks.json is valid JSON"
+else
+  fail "hooks.json is NOT valid JSON"
+fi
+
+echo ""
+echo "=== 40. HOOKS: All hook scripts exist and are executable ==="
+for hook_script in hooks/validate-state-write.sh hooks/block-pipe-masking.sh hooks/protect-sealed-milestones.sh; do
+  if [ -x "$hook_script" ]; then
+    pass "$(basename $hook_script) exists and is executable"
+  else
+    fail "$(basename $hook_script) missing or not executable"
+  fi
+done
+
+echo ""
+echo "=== 41. HOOKS: Hook scripts handle JSON I/O correctly ==="
+# Each hook must output valid JSON for the "allow" case
+for hook_script in hooks/validate-state-write.sh hooks/block-pipe-masking.sh hooks/protect-sealed-milestones.sh; do
+  output=$(echo '{"tool_name":"test","tool_input":{}}' | bash "$hook_script" 2>/dev/null)
+  if echo "$output" | python3 -c "import json,sys; json.load(sys.stdin)" 2>/dev/null; then
+    pass "$(basename $hook_script) outputs valid JSON"
+  else
+    fail "$(basename $hook_script) outputs invalid JSON: $output"
+  fi
+done
+
+echo ""
+echo "=== 42. HOOKS: Pipe-blocking hook denies | tail ==="
+deny_output=$(echo '{"tool_name":"run_shell_command","tool_input":{"command":"npm test | tail -20"}}' | bash hooks/block-pipe-masking.sh 2>/dev/null)
+if echo "$deny_output" | grep -q '"deny"'; then
+  pass "Pipe-blocking hook correctly denies '| tail'"
+else
+  fail "Pipe-blocking hook did NOT deny '| tail': $deny_output"
+fi
+
+echo ""
+echo "=== 43. HOOKS: Pipe-blocking hook allows clean commands ==="
+allow_output=$(echo '{"tool_name":"run_shell_command","tool_input":{"command":"npm test"}}' | bash hooks/block-pipe-masking.sh 2>/dev/null)
+if echo "$allow_output" | grep -q '"allow"'; then
+  pass "Pipe-blocking hook correctly allows clean command"
+else
+  fail "Pipe-blocking hook did NOT allow clean command: $allow_output"
+fi
+
+echo ""
+echo "=== 44. HOOKS: State validation hook allows non-state writes ==="
+allow_output=$(echo '{"tool_name":"write_file","tool_input":{"file_path":"/tmp/test.txt","content":"hello"}}' | bash hooks/validate-state-write.sh 2>/dev/null)
+if echo "$allow_output" | grep -q '"allow"'; then
+  pass "State hook allows non-state.json writes"
+else
+  fail "State hook blocked non-state.json write: $allow_output"
+fi
+
+echo ""
+echo "=== 45. HOOKS: SessionStart hook referenced in hooks.json ==="
+if grep -q "session-context" hooks/hooks.json; then
+  pass "SessionStart hook registered"
+else
+  fail "SessionStart hook NOT registered in hooks.json"
+fi
+
+echo ""
 echo "=== SUMMARY ==="
 echo "Errors: $ERRORS"
 echo "Warnings: $WARNINGS"

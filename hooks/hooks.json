@@ -8,7 +8,48 @@
             "name": "load-active-mission-context",
             "type": "command",
             "command": "scripts/session-context.sh",
-            "timeout": 5000
+            "timeout": 5000,
+            "description": "Loads active mission context on session start for cross-session persistence"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "write_file|replace",
+        "hooks": [
+          {
+            "name": "validate-state-write",
+            "type": "command",
+            "command": "${extensionPath}/hooks/validate-state-write.sh",
+            "timeout": 3000,
+            "description": "Validates state.json after every write — catches corruption immediately"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "name": "block-pipe-masking",
+            "type": "command",
+            "command": "${extensionPath}/hooks/block-pipe-masking.sh",
+            "timeout": 2000,
+            "description": "Blocks commands piped through tail/head that mask exit codes"
+          }
+        ]
+      },
+      {
+        "matcher": "write_file",
+        "hooks": [
+          {
+            "name": "protect-sealed-milestones",
+            "type": "command",
+            "command": "${extensionPath}/hooks/protect-sealed-milestones.sh",
+            "timeout": 3000,
+            "description": "Warns when writing features.json in missions with sealed milestones"
           }
         ]
       }

@@ -93,6 +93,15 @@ Project enrichment: `<project>/.mission/` — services.yaml, init.sh, library/, 
 - **Sealed milestones are immutable.** Follow-up features targeting sealed milestones go to `misc-*` instead.
 - **Cancelled features satisfy preconditions.** DAG evaluation treats cancelled as "done."
 
-## Cross-Session Persistence
+## Hooks (Automated Safety)
 
-All state written to disk immediately. SessionStart hook (`scripts/session-context.sh`) auto-loads active mission context on every session start. Crash recovery in orchestrator Step 1 handles interrupted `worker_running` state.
+These hooks run automatically — you don't need to invoke them:
+
+| Hook | Event | What It Does |
+|------|-------|-------------|
+| `load-active-mission-context` | SessionStart | Loads active mission context for cross-session persistence |
+| `validate-state-write` | AfterTool (write_file/replace) | Validates `state.json` after every write — catches corruption immediately |
+| `block-pipe-masking` | BeforeTool (run_shell_command) | **Blocks** commands piped through `\| tail` or `\| head` — hard enforcement of exit code safety |
+| `protect-sealed-milestones` | BeforeTool (write_file) | Warns when writing features.json in missions with sealed milestones |
+
+The pipe-blocking hook is a **hard gate** — it denies the tool call and returns an error message to the agent. The state validation hook is **advisory** — it allows the write but injects a corruption warning if fields are missing or invalid.
