@@ -198,7 +198,7 @@ Update `~/.gemini-mc/missions/mis_<id>/mission.md` with: original description, r
 ### 7.6 Scaffold `.mission/`
 Create `<workingDirectory>/.mission/` with:
 - `services.yaml` — from Phase 5 plan
-- `init.sh` — from Phase 5 plan (run `chmod +x` to make executable)
+- `init.sh` — from Phase 5 plan. After writing, run `chmod +x .mission/init.sh`
 - `library/architecture.md` — architecture decisions from Phase 2
 - `library/environment.md` — environment setup documentation
 - `library/user-testing.md` — testing surface from Phase 6
