@@ -146,19 +146,17 @@ Write to `~/.gemini-mc/missions/mis_<id>/features.json`.
 
 ```json
 {
-  "features": [
-    {
-      "id": "setup-database",
-      "description": "Initialize PostgreSQL database with connection pooling...",
-      "skillName": "mission-worker",
-      "milestone": "foundation",
-      "preconditions": [],
-      "expectedBehavior": ["PostgreSQL database is accessible", "Users table exists"],
-      "verificationSteps": ["psql -c 'SELECT 1' exits with code 0"],
-      "fulfills": ["VAL-DB-001"],
-      "status": "pending"
-    }
-  ]
+  "features": [{
+    "id": "setup-database",
+    "description": "Initialize PostgreSQL database with connection pooling...",
+    "skillName": "mission-worker",
+    "milestone": "foundation",
+    "preconditions": [],
+    "expectedBehavior": ["PostgreSQL database is accessible", "Users table exists"],
+    "verificationSteps": ["psql -c 'SELECT 1' exits with code 0"],
+    "fulfills": ["VAL-DB-001"],
+    "status": "pending"
+  }]
 }
 ```
 
