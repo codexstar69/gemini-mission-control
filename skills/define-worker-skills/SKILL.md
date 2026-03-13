@@ -132,7 +132,7 @@ Required: salientSummary, whatWasImplemented, whatWasLeftUndone, verification.co
 - [ ] `kind: local` (never `kind: agent`)
 - [ ] `tools` array uses ONLY valid Gemini CLI tool names
 - [ ] Body has Startup/Work/Cleanup phases
-- [ ] Cleanup includes `git add -A && git commit` step
+- [ ] Cleanup includes `git add -A && git commit -m "<prefix>(<feature-id>): <desc>"` step
 - [ ] Cleanup includes pipe-masking warning
 - [ ] Handoff schema matches required format (all 5 required fields)
 - [ ] Agent `name` matches `skillName` in features.json
