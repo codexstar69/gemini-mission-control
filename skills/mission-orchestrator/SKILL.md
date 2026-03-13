@@ -72,7 +72,8 @@ Build an enriched prompt for the worker agent containing:
    - `scrutiny-validator` → `agents/scrutiny-validator.md`
    - `user-testing-validator` → `agents/user-testing-validator.md`
    - Unknown skillName → check if `agents/<skillName>.md` exists; if not, fall back to `mission-worker`
-5. **Environment setup** — for the first worker dispatch in this session, include instruction to run `bash <workingDirectory>/.mission/init.sh` (this script is idempotent)
+5. **Handoff context** — if the feature has preconditions, read the handoff files (`handoffs/<precondition-id>.json`) for each completed precondition and include their `salientSummary` in the prompt. This gives the worker context about what was already built.
+6. **Environment setup** — for the first worker dispatch in this session, include instruction to run `bash <workingDirectory>/.mission/init.sh` (this script is idempotent)
 
 ---
 
