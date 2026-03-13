@@ -31,6 +31,7 @@ When activated from `/mission-auto`, run ALL 7 phases without asking the user an
 - Features: prefer fewer, larger milestones (3–5 features each) over many small ones.
 - Ambiguous requirements: implement the minimal viable interpretation. Workers can expand later.
 - Testing: default to unit + integration tests. Skip e2e unless the description explicitly mentions it.
+- Non-interactive commands: ALL shell commands in feature descriptions and verificationSteps MUST use non-interactive flags (e.g., `--yes`, `--no-input`, `-y`, `--non-interactive`). Workers run as subagents and cannot respond to interactive prompts. Examples: `npx create-next-app --yes`, `npm init -y`, `pip install --no-input`, `docker run -d` (not foreground).
 
 All quality gates (DAG acyclicity, coverage gate, pre-transition verification) are **mandatory in both modes**. Headless mode only skips user-facing questions and confirmations.
 

@@ -124,6 +124,7 @@ Required: salientSummary, whatWasImplemented, whatWasLeftUndone, verification.co
 **Rules:**
 - Report actual exit codes. Don't fabricate results. Flag blockers as severity=high.
 - **CRITICAL for Work phase:** Include an explicit warning in every agent body to never pipe command output through `| tail` or `| head` — this masks exit codes and hides failures.
+- **CRITICAL: Non-interactive commands only.** Workers are subagents that cannot respond to interactive prompts. ALL commands must use non-interactive flags: `--yes`, `-y`, `--no-input`, `--non-interactive`, `--quiet`, etc. Never run foreground processes that wait for input (e.g., use `docker run -d`, not `docker run`). Never use CLIs that prompt for options without disabling prompts (e.g., `npx create-next-app --yes`, not bare `npx create-next-app`). Infinite retry loops MUST have a max attempt count (≤10) and a timeout.
 
 ---
 
