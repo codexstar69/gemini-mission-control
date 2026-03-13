@@ -97,11 +97,13 @@ Project enrichment: `<project>/.mission/` — services.yaml, init.sh, library/, 
 
 These hooks run automatically — you don't need to invoke them:
 
-| Hook | Event | What It Does |
-|------|-------|-------------|
-| `load-active-mission-context` | SessionStart | Loads active mission context for cross-session persistence |
-| `validate-state-write` | AfterTool (write_file/replace) | Validates `state.json` after every write — catches corruption immediately |
-| `block-pipe-masking` | BeforeTool (run_shell_command) | **Blocks** commands piped through `\| tail` or `\| head` — hard enforcement of exit code safety |
-| `protect-sealed-milestones` | BeforeTool (write_file) | Warns when writing features.json in missions with sealed milestones |
+| Hook | Event | Impact |
+|------|-------|--------|
+| `load-active-mission-context` | SessionStart | Injects active mission context for cross-session persistence |
+| `validate-state-write` | AfterTool (write_file/replace) | Validates `state.json` structure after every write — catches corruption immediately |
+| `validate-features-write` | AfterTool (write_file/replace) | Validates `features.json` schema — catches missing fields, invalid statuses |
+| `block-pipe-masking` | BeforeTool (run_shell_command) | **HARD GATE:** Denies commands piped through `\| tail` / `\| head` (masks exit codes) |
+| `protect-sealed-milestones` | BeforeTool (write_file) | Injects sealed milestone reminder on features.json writes |
+| `check-state-drift` | AfterAgent | Detects counter mismatches (completedFeatures/totalFeatures vs actual) on session end |
 
-The pipe-blocking hook is a **hard gate** — it denies the tool call and returns an error message to the agent. The state validation hook is **advisory** — it allows the write but injects a corruption warning if fields are missing or invalid.
+**Hard gates** (`block-pipe-masking`) deny the tool call and return an error to the agent. **Validators** (`validate-state-write`, `validate-features-write`) allow the write but inject warnings. **Advisory** hooks (`check-state-drift`, `protect-sealed-milestones`) add context without blocking.

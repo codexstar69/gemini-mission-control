@@ -24,6 +24,13 @@
             "command": "${extensionPath}/hooks/validate-state-write.sh",
             "timeout": 3000,
             "description": "Validates state.json after every write — catches corruption immediately"
+          },
+          {
+            "name": "validate-features-write",
+            "type": "command",
+            "command": "${extensionPath}/hooks/validate-features-write.sh",
+            "timeout": 3000,
+            "description": "Validates features.json schema after every write — catches missing fields and invalid statuses"
           }
         ]
       }
@@ -50,6 +57,20 @@
             "command": "${extensionPath}/hooks/protect-sealed-milestones.sh",
             "timeout": 3000,
             "description": "Warns when writing features.json in missions with sealed milestones"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "check-state-drift",
+            "type": "command",
+            "command": "${extensionPath}/hooks/check-state-drift.sh",
+            "timeout": 5000,
+            "description": "Detects counter mismatches between state.json and features.json on session end"
           }
         ]
       }
