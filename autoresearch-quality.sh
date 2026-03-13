@@ -286,7 +286,18 @@ check_present "$ORCH" "crash_recovery" "Crash: recovery log event"
 check_present "$ORCH" "worker_started.*worker_completed|worker_completed.*worker_started" "Crash: detect stuck by matching start/complete events"
 
 echo ""
-echo "=== 28. VALIDATE STATE SCRIPT ==="
+echo "=== 28. SEVERITY FORMAT: All agents use high/medium/low ==="
+for agent in agents/*.md; do
+  name=$(basename "$agent" .md)
+  if rg -q '"blocking|non_blocking"' "$agent" 2>/dev/null; then
+    fail "$name uses blocking/non_blocking severity (should be high/medium/low)"
+  else
+    pass "Consistent severity format in $name"
+  fi
+done
+
+echo ""
+echo "=== 29. VALIDATE STATE SCRIPT ==="
 if bash scripts/validate-state.sh 076af0 2>&1 | rg -q "VALID"; then
   pass "validate-state.sh passes on test mission"
 else

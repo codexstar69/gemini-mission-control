@@ -103,7 +103,7 @@ Write to `.mission/validation/<milestone>/user-testing/synthesis.json` (create d
   },
   "tests": {"added": [], "coverage": "Validation-only task; no new tests added."},
   "discoveredIssues": [
-    {"severity": "blocking|non_blocking", "description": "...", "suggestedFix": "..."}
+    {"severity": "high|medium|low", "description": "...", "suggestedFix": "..."}
   ]
 }
 ```

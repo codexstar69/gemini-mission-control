@@ -78,14 +78,16 @@ Write to `.mission/validation/<milestone>/scrutiny/synthesis.json` (create direc
     "completedFeaturesReviewed": ["feature-id-1", "feature-id-2"]
   },
   "findings": [
-    {"severity": "blocking|non_blocking", "featureId": "...", "summary": "...", "evidence": ["..."]}
+    {"severity": "high|medium|low", "featureId": "...", "summary": "...", "evidence": ["..."]}
   ],
   "summary": "Overall assessment",
   "nextAction": "pass|fix"
 }
 ```
 
-**Status rules:** `"passed"` if ALL hard-gate commands passed AND no blocking findings remain. `"failed"` otherwise.
+**Status rules:** `"passed"` if ALL hard-gate commands passed AND no high-severity findings remain. `"failed"` otherwise.
+
+**Severity mapping:** `"high"` = blocks milestone (hard-gate failure, security issue, broken feature), `"medium"` = should fix soon, `"low"` = minor improvement. This matches the orchestrator's decision tree.
 
 ---
 
@@ -97,13 +99,13 @@ Produce JSON handoff as the **last thing** in your response:
 {
   "salientSummary": "1-4 sentences describing scrutiny outcome.",
   "whatWasImplemented": "Commands run, features reviewed, synthesis written. ≥50 chars.",
-  "whatWasLeftUndone": "Blocking items, or empty if passed.",
+  "whatWasLeftUndone": "High-severity items, or empty if passed.",
   "verification": {
     "commandsRun": [{"command": "...", "exitCode": 0, "observation": "..."}]
   },
   "tests": {"added": [], "coverage": "Validation-only task; no new tests added."},
   "discoveredIssues": [
-    {"severity": "blocking|non_blocking", "description": "...", "suggestedFix": "..."}
+    {"severity": "high|medium|low", "description": "...", "suggestedFix": "..."}
   ]
 }
 ```

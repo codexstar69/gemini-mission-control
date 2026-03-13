@@ -1,17 +1,26 @@
 # Autoresearch Ideas Backlog
 
-## Quality Improvements (High Impact)
-- **Add scenario trace tests**: Walk through specific scenarios (happy path, worker failure, crash recovery, milestone sealing) in the quality test to verify the orchestrator handles each correctly
-- **Cross-reference validation**: Verify that every field the orchestrator writes to state.json is listed in the validate-state.sh schema check
-- **Agent tool validation**: Verify that every tool name in agent frontmatter is in the valid tool list from define-worker-skills
-- **services.yaml format alignment**: Ensure planner, orchestrator, and all agents reference the same services.yaml key structure
+## Completed
+- ✅ Scenario trace tests (happy path, retry, crash recovery)
+- ✅ Cross-reference validation (scaffold→validate round-trip)
+- ✅ Agent tool name validation
+- ✅ Worker pre-handoff checklist
+- ✅ Option A edge case (high-severity + incomplete → Option B)
+- ✅ Handoff context from preconditions in worker prompts
+- ✅ Validator feature fields fully specified
+- ✅ Service cleanup guardrail
+
+## Quality Improvements (Remaining)
+- **End-to-end simulation test**: Create a mock mission with 2 milestones and trace through the entire orchestrator flow verifying state changes at each step
+- **Validator handoff parsing**: The scrutiny and user-testing validators produce different handoff formats (blocking/non_blocking vs high/medium/low severity). Verify the orchestrator handles both correctly.
+- **Message bus consumption**: Workers are told to read `messages.jsonl` but the orchestrator doesn't explicitly include recent messages in the worker prompt. Consider adding this.
 
 ## Byte Reduction (Quality-Preserving)
-- **Deduplicate log event format examples**: The orchestrator has many `{"timestamp":"...","event":"..."}` examples. Could define a "Log format" section once and reference it
-- **Compress GEMINI.md directory tree**: The ASCII directory listing could use a more compact format
-- **TOML commands**: Some commands repeat "find most recent mission" logic. Could extract to a shared pattern reference
+- **Deduplicate log event format**: The `{"timestamp":"...","event":"..."}` pattern appears 9 times in orchestrator. Could define once and reference. Saves ~200 bytes.
+- **Combine Pause/Resume with Budget**: These share logic. Could merge sections. Saves ~100 bytes.
+- **Command TOML "find mission" pattern**: 7 commands repeat the same "find mission" logic. Could reference a shared pattern. But TOML commands are independently loaded, so this may not be possible.
 
 ## Stability Improvements
-- **Add explicit "STOP" markers**: Before risky operations (state transitions, milestone sealing), add prominent stop-and-verify instructions
-- **Add pre-commit verification**: Before each git commit in workers, verify all tests pass (some workers might commit broken code)
-- **Idempotency documentation**: Document which operations are safe to retry vs which have side effects
+- **Worker timeout handling**: What happens when a worker hits timeout_mins? The orchestrator should have explicit instructions for handling subagent timeouts.
+- **Concurrent access protection**: If two sessions try to run the same mission simultaneously, state corruption is possible. Document single-session constraint.
+- **Progress log rotation**: Over very long missions, progress_log.jsonl could grow large. Consider adding rotation or trimming guidance.
