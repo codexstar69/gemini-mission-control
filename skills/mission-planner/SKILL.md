@@ -62,7 +62,9 @@ Each feature requires:
 
 ### DAG Acyclicity Check (MANDATORY)
 
-Before proceeding, verify the precondition graph has no cycles using topological sort:
+Before proceeding, verify:
+1. **No duplicate feature IDs** — every feature `id` must be unique across all milestones. Duplicate IDs cause handoff file conflicts and ambiguous precondition resolution.
+2. **No cycles** — use topological sort:
 
 1. For each feature, compute its in-degree (number of features it depends on)
 2. Initialize a queue with all features that have in-degree 0

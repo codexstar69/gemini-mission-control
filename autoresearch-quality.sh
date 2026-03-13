@@ -547,6 +547,14 @@ else
 fi
 
 echo ""
+echo "=== 55. PLANNER: Duplicate feature ID check ==="
+if grep -q "duplicate.*[Ii][Dd]\|[Ii][Dd].*unique\|[Nn]o duplicate" "$PLAN" 2>/dev/null; then
+  pass "Planner checks for duplicate feature IDs"
+else
+  fail "Planner does not check for duplicate feature IDs"
+fi
+
+echo ""
 echo "=== SUMMARY ==="
 echo "Errors: $ERRORS"
 echo "Warnings: $WARNINGS"
