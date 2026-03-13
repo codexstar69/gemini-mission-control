@@ -121,7 +121,9 @@ Every worker MUST produce this JSON at the end:
 
 Required: salientSummary, whatWasImplemented, whatWasLeftUndone, verification.commandsRun (≥1), discoveredIssues (can be []).
 
-**Rules:** Report actual exit codes. Don't fabricate results. Flag blockers as severity=high.
+**Rules:**
+- Report actual exit codes. Don't fabricate results. Flag blockers as severity=high.
+- **CRITICAL for Work phase:** Include an explicit warning in every agent body to never pipe command output through `| tail` or `| head` — this masks exit codes and hides failures.
 
 ---
 
