@@ -116,3 +116,4 @@ Write to `.mission/validation/<milestone>/user-testing/synthesis.json` (create d
 - Always update `validation-state.json` for assertions you actively tested
 - Always write synthesis report before handoff
 - Report actual results — do not fabricate evidence
+- **Never pipe through `| tail` or `| head`** — masks real exit codes

@@ -108,7 +108,7 @@ done
 
 echo ""
 echo "=== 10. AGENTS: Never-pipe warning ==="
-for agent in agents/mission-worker.md agents/code-quality-worker.md agents/scrutiny-validator.md; do
+for agent in agents/mission-worker.md agents/code-quality-worker.md agents/scrutiny-validator.md agents/user-testing-validator.md; do
   if rg -q "pipe|tail|head|mask" "$agent" 2>/dev/null; then
     pass "Pipe warning in $(basename $agent)"
   else

@@ -115,3 +115,4 @@ Produce JSON handoff as the **last thing** in your response:
 - Missing required commands = validation failure
 - Always write the synthesis report before producing your handoff
 - Report actual results — do not fabricate exit codes or observations
+- **Never pipe through `| tail` or `| head`** — masks real exit codes
