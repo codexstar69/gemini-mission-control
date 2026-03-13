@@ -297,7 +297,19 @@ for agent in agents/*.md; do
 done
 
 echo ""
-echo "=== 29. VALIDATE STATE SCRIPT ==="
+echo "=== 29. CROSS-FILE: services.yaml format consistency ==="
+# Planner should define the format, agents should reference the same fields
+check_present "$PLAN" "healthcheck" "Planner defines healthcheck in services.yaml"
+check_present "$PLAN" "depends_on" "Planner defines depends_on in services.yaml"
+check_present "agents/user-testing-validator.md" "healthcheck" "User-testing validator references healthcheck"
+check_present "agents/user-testing-validator.md" "depends_on" "User-testing validator references depends_on"
+# Verify test/typecheck/lint commands are mentioned in planner
+check_present "$PLAN" "test.*command|command.*test" "Planner defines test command"
+check_present "$PLAN" "typecheck" "Planner defines typecheck command"
+check_present "$PLAN" "lint" "Planner defines lint command"
+
+echo ""
+echo "=== 30. VALIDATE STATE SCRIPT ==="
 if bash scripts/validate-state.sh 076af0 2>&1 | rg -q "VALID"; then
   pass "validate-state.sh passes on test mission"
 else
