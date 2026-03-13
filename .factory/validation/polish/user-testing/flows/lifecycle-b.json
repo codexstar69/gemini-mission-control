@@ -1,0 +1,35 @@
+{
+  "flowId": "lifecycle-b",
+  "assertions": {
+    "VAL-POL-001": {
+      "status": "pass",
+      "evidence": [
+        "commands/mission-start.toml exists and is valid TOML with non-empty prompt (1022 chars)",
+        "commands/mission-plan.toml exists and is valid TOML with non-empty prompt (1806 chars)",
+        "commands/mission-run.toml exists and is valid TOML with non-empty prompt (2627 chars)",
+        "GEMINI.md documents all state transitions: planning→orchestrator_turn, orchestrator_turn→worker_running, worker_running→handoff_review, handoff_review→orchestrator_turn, orchestrator_turn→completed (lines 201-225)",
+        "scaffold-mission.sh creates all required files: state.json, features.json, mission.md, validation-contract.md, validation-state.json, progress_log.jsonl, messages.jsonl, AGENTS.md, handoffs/",
+        "scaffold-mission.sh smoke test: ran with poltest001 /tmp/poltest, all 9 files verified present, state.json valid JSON with state=planning",
+        "skills/mission-planner/SKILL.md Phase 7.7 transitions state from planning to orchestrator_turn with coverage gate",
+        "skills/mission-orchestrator/SKILL.md Step 8.4 checks all features completed/cancelled and transitions to completed state",
+        "Orchestrator run loop covers full 8-step lifecycle: read state, evaluate DAG, construct prompt, dispatch worker, parse handoff, apply decision tree, update state, check milestone completion"
+      ],
+      "issues": []
+    },
+    "VAL-POL-002": {
+      "status": "pass",
+      "evidence": [
+        "commands/mission-export.toml exists and is valid TOML (python3 tomllib parse exits 0)",
+        "Has prompt field with 1290 chars",
+        "description field: 'Export a mission as a tar.gz archive'",
+        "Prompt instructs: tar -czf ~/mission-<missionId>-export.tar.gz -C ~/.gemini-mc/missions <mission_directory_name>",
+        "Prompt includes verification step: ls -lh ~/mission-<missionId>-export.tar.gz",
+        "Prompt includes user summary with archive path, size, and contents description"
+      ],
+      "issues": []
+    }
+  },
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["shell"]
+}

@@ -1,0 +1,22 @@
+{
+  "milestone": "polish",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-POL-001",
+    "VAL-POL-002",
+    "VAL-POL-005",
+    "VAL-POL-006"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "previousRound": null,
+  "notes": "All 4 assertions from completed implementation features in milestone polish passed. VAL-POL-003 and VAL-POL-004 were not tested as they are not in the fulfills of any completed implementation feature in this milestone."
+}

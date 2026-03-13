@@ -1,0 +1,32 @@
+{
+  "flowId": "structural-a",
+  "assertions": {
+    "VAL-POL-005": {
+      "status": "pass",
+      "evidence": [
+        "README.md exists (19931 bytes)",
+        "Project description: Lines 1-4 contain title and description of multi-agent mission orchestration",
+        "Prerequisites section: Line 19 '## Prerequisites' with Gemini CLI v0.33+ (line 21) and experimental.enableAgents (line 25)",
+        "Installation section: Line 31 '## Installation' with 'gemini extensions link .' on line 43",
+        "Commands section: Line 85 '## Commands' documents all 9 commands: /mission-start (line 87), /mission-plan (line 110), /mission-run (line 131), /mission-status (line 154), /mission-list (line 175), /mission-pause (line 194), /mission-resume (line 212), /mission-export (line 228), /mission-override (line 251)",
+        "Architecture section: Line 268 '## Architecture' with extension structure tree, subagent dispatch diagram, and state management details"
+      ],
+      "issues": []
+    },
+    "VAL-POL-006": {
+      "status": "pass",
+      "evidence": [
+        "Command 'gemini extensions link .' executed from /Users/codex/Projects/gemini-mission-control-extension",
+        "Exit code: 0",
+        "Output confirmed extension 'gemini-mission-control' installed successfully",
+        "No validation errors in output",
+        "Extension registered 3 agent skills: mission-planner, mission-orchestrator, define-worker-skills",
+        "GEMINI.md context file detected and accepted"
+      ],
+      "issues": []
+    }
+  },
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["shell"]
+}
