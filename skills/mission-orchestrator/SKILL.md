@@ -16,7 +16,7 @@ Drives the autonomous run loop: read state → evaluate DAG → dispatch worker 
 1. Mission dir exists at `~/.gemini-mc/missions/mis_<id>/`
 2. `state.json` state is `orchestrator_turn` (or `worker_running` for crash recovery)
 3. `features.json` has at least one feature
-4. `workingDirectory` from `state.json` is accessible
+4. `workingDirectory` from `state.json` is accessible. **If not accessible:** set state to `"failed"`, log `{"event":"fatal_error","reason":"workingDirectory not accessible: <path>"}`, inform user, exit.
 
 ---
 
