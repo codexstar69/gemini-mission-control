@@ -349,7 +349,14 @@ echo "=== 33. SCENARIO: All-cancelled milestone (no validation) ==="
 check_present "$ORCH" "ALL.*cancelled.*skip validation|ALL.*cancelled.*do not inject" "All-cancelled milestone skips validation"
 
 echo ""
-echo "=== 34. GEMINI.md: Common Pitfalls section exists ==="
+echo "=== 34. PLANNER: Feature schema completeness ==="
+# All required feature fields must be documented in the planner
+for field in "id" "description" "skillName" "milestone" "preconditions" "expectedBehavior" "verificationSteps" "fulfills"; do
+  check_present "$PLAN" "\`$field\`" "Planner documents feature field: $field"
+done
+
+echo ""
+echo "=== 35. GEMINI.md: Common Pitfalls section exists ==="
 check_present "GEMINI.md" "Common Pitfalls" "Common Pitfalls section"
 check_present "GEMINI.md" "pipe.*exit code|exit code.*pipe" "Pipe warning in pitfalls"
 check_present "GEMINI.md" "high/medium/low" "Severity format in pitfalls"
