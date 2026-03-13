@@ -31,10 +31,11 @@ You test milestone behavioral assertions against the validation contract by exer
 
 ## Phase 2: Environment Setup
 
-1. **Start required services** using commands from `.mission/services.yaml`:
+1. **Start services** if `.mission/services.yaml` defines a `services:` section:
    - Start dependencies first (check `depends_on`)
    - Wait for each service's `healthcheck` to pass before proceeding
    - If a service cannot start → mark affected assertions as `"blocked"` with the reason
+   - If no services are defined, skip to step 2 (project may be a library or CLI tool)
 2. **Understand the testing surface** from `.mission/library/user-testing.md`: URLs, CLI commands, flows, and evidence requirements
 3. **Use `google_web_search`** only if a test is blocked by missing external documentation that isn't available locally
 
