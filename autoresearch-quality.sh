@@ -356,7 +356,26 @@ for field in "id" "description" "skillName" "milestone" "preconditions" "expecte
 done
 
 echo ""
-echo "=== 35. GEMINI.md: Common Pitfalls section exists ==="
+echo "=== 35. STRUCTURAL: Orchestrator step ordering ==="
+# Steps must appear in order 1-8
+prev_line=0
+all_ordered=true
+for step in 1 2 3 4 5 6 7 8; do
+  line=$(rg -n "^## Step ${step}:" "$ORCH" | head -1 | cut -d: -f1)
+  if [ -z "$line" ]; then
+    fail "Step $step missing from orchestrator"
+    all_ordered=false
+  elif [ "$line" -le "$prev_line" ]; then
+    fail "Step $step is out of order (line $line, prev was $prev_line)"
+    all_ordered=false
+  else
+    prev_line=$line
+  fi
+done
+$all_ordered && pass "Steps 1-8 appear in correct order"
+
+echo ""
+echo "=== 36. GEMINI.md: Common Pitfalls section exists ==="
 check_present "GEMINI.md" "Common Pitfalls" "Common Pitfalls section"
 check_present "GEMINI.md" "pipe.*exit code|exit code.*pipe" "Pipe warning in pitfalls"
 check_present "GEMINI.md" "high/medium/low" "Severity format in pitfalls"
