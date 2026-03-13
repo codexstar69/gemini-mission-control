@@ -149,7 +149,49 @@ check_present "$DWS" "Startup|startup" "Startup phase"
 check_present "$DWS" "Cleanup|cleanup" "Cleanup phase"
 
 echo ""
-echo "=== 15. VALIDATE STATE SCRIPT ==="
+echo "=== 15. ORCHESTRATOR: Cancelled features satisfy preconditions ==="
+check_present "$ORCH" "cancelled" "Orchestrator mentions cancelled features"
+# Check that DAG eval mentions cancelled
+if rg -q "completed.*cancelled|cancelled.*completed" "$ORCH" 2>/dev/null; then
+  pass "DAG eval handles cancelled as satisfied in orchestrator"
+else
+  warn "Orchestrator may not handle cancelled features in DAG eval"
+fi
+
+echo ""
+echo "=== 16. GEMINI.md: Cancelled in preconditions ==="
+if rg -q "completed or cancelled|completed/cancelled" "GEMINI.md" 2>/dev/null; then
+  pass "GEMINI.md mentions cancelled satisfies preconditions"
+else
+  warn "GEMINI.md may not mention cancelled features satisfy preconditions"
+fi
+
+echo ""
+echo "=== 17. ORCHESTRATOR: updatedAt timestamp guidance ==="
+check_present "$ORCH" "updatedAt" "updatedAt field mentioned"
+check_present "$ORCH" "ISO 8601" "ISO 8601 timestamp format"
+
+echo ""
+echo "=== 18. PLANNER: Feature JSON example ==="
+check_present "$PLAN" "expectedBehavior" "expectedBehavior in feature schema"
+check_present "$PLAN" "verificationSteps" "verificationSteps in feature schema"
+check_present "$PLAN" "fulfills" "fulfills in feature schema"
+check_present "$PLAN" "preconditions" "preconditions in feature schema"
+
+echo ""
+echo "=== 19. PLANNER: VAL ID format ==="
+check_present "$PLAN" "VAL-" "VAL- prefix in planner"
+check_present "$PLAN" "VAL-.*-[0-9]" "VAL ID number suffix pattern"
+
+echo ""
+echo "=== 20. AGENTS: All 4 agents have tools array ==="
+for agent in agents/*.md; do
+  name=$(basename "$agent" .md)
+  check_present "$agent" "tools" "tools array in $name"
+done
+
+echo ""
+echo "=== 21. VALIDATE STATE SCRIPT ==="
 if bash scripts/validate-state.sh 076af0 2>&1 | rg -q "VALID"; then
   pass "validate-state.sh passes on test mission"
 else

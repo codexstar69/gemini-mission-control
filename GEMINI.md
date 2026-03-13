@@ -45,7 +45,7 @@ States: `planning` → `orchestrator_turn` ⇄ `worker_running` → `handoff_rev
 
 **Key rules:**
 - `planning → orchestrator_turn`: Requires coverage gate pass (every VAL-XXX-NNN claimed by exactly one feature's `fulfills`).
-- `orchestrator_turn → worker_running`: Dispatch worker for first ready feature (pending + all preconditions completed).
+- `orchestrator_turn → worker_running`: Dispatch worker for first ready feature (pending + all preconditions completed or cancelled).
 - `handoff_review → orchestrator_turn`: Decision tree — Option A (high-severity → follow-up), Option B (failure → retry, max 3), Option C (partial → update desc), Option D (med/low → misc milestone).
 - `orchestrator_turn → completed`: All features completed/cancelled + all milestones sealed.
 
