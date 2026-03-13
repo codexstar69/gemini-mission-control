@@ -88,7 +88,7 @@ Write to `.mission/validation/<milestone>/user-testing/synthesis.json` (create d
 
 ## Phase 5: Cleanup & Handoff
 
-1. **Stop services** you started using the `stop` commands from `.mission/services.yaml`
+1. **Stop ALL services** you started using the `stop` commands from `.mission/services.yaml`. Even if tests failed, always stop services before producing the handoff — leaving services running blocks ports for future workers.
 
 2. **Produce JSON handoff** as the last thing in your response:
 
