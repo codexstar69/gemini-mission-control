@@ -181,7 +181,7 @@ After applying the decision tree:
 1. Write the updated `features.json` to disk
 2. Update `state.json`:
    - Set state back to `"orchestrator_turn"`
-   - Update `completedFeatures` and `totalFeatures` counters as needed
+   - Increment `completedFeatures` if a feature was marked completed. Increment `totalFeatures` if new features were created (Option A follow-ups or Option D misc features).
    - Update `updatedAt` to current ISO 8601 timestamp
 3. Append to `progress_log.jsonl`: `{"timestamp":"...","event":"state_transition","from":"handoff_review","to":"orchestrator_turn","decision":"<Option A/B/C/D/Clean>","featureId":"<id>"}`
 4. Append to `messages.jsonl`: `{"timestamp":"...","sender":"orchestrator","type":"feature_completed","content":"<salientSummary from handoff>"}`
