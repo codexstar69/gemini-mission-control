@@ -1,25 +1,11 @@
 description = "Create a new mission and scaffold its directory structure"
 prompt = """
-The user wants to start a new mission. Their project description: {{args}}
+Create new mission. Description: {{args}}
 
-Follow these steps exactly:
+If {{args}} is empty → ask user to describe what they want to build.
 
-1. Generate a unique mission ID by creating a random 6-character hex string. You can do this by running:
-   `cat /dev/urandom | LC_ALL=C tr -dc 'a-f0-9' | head -c 6`
-
-2. Determine the current working directory by running: `pwd`
-
-3. Run the scaffold script with the generated ID and current directory:
-   `bash scripts/scaffold-mission.sh <MISSION_ID> <WORKING_DIRECTORY>`
-
-   Replace <MISSION_ID> with the hex ID from step 1, and <WORKING_DIRECTORY> with the absolute path from step 2.
-
-4. Confirm to the user that the mission has been created. Display:
-   - Mission ID: mis_<MISSION_ID>
-   - Mission directory: ~/.gemini-mc/missions/mis_<MISSION_ID>/
-   - Working directory: <WORKING_DIRECTORY>
-   - State: planning
-   - Next step: Run /mission-plan to begin interactive planning
-
-If the user did not provide a project description ({{args}} is empty), ask them to describe what they want to build before proceeding.
+1. Generate 6-char hex ID: `cat /dev/urandom | LC_ALL=C tr -dc 'a-f0-9' | head -c 6`
+2. Get working directory: `pwd`
+3. Scaffold: `bash scripts/scaffold-mission.sh <ID> <DIR>`
+4. Confirm: Mission ID (mis_<ID>), mission dir, working dir, state=planning, "Run /mission-plan to begin planning."
 """

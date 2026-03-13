@@ -1,41 +1,20 @@
 description = "Display the current status of a mission"
 prompt = """
-The user wants to check mission status. Arguments: {{args}}
+Show mission status. Args: {{args}}
 
-Do NOT reference or use any external CLI tool or script. Use only read_file and list_directory tools directly.
+Use only read_file and list_directory tools (no external scripts).
 
-Follow these steps:
+1. Find mission:
+   - If {{args}} has ID: try `~/.gemini-mc/missions/mis_{{args}}/state.json` then `~/.gemini-mc/missions/{{args}}/state.json`. Not found → error.
+   - If empty: list `~/.gemini-mc/missions/`, read each state.json, pick most recent by updatedAt. None → "Use /mission-start."
 
-1. Determine which mission to display:
+2. Read features.json from same dir. Find first feature with status=`pending` → its milestone is current milestone. No pending → "all complete".
 
-   a. If {{args}} contains a mission ID, read the state file directly:
-      - Try read_file on ~/.gemini-mc/missions/mis_{{args}}/state.json
-      - If that fails, try read_file on ~/.gemini-mc/missions/{{args}}/state.json
-      - If neither exists, tell the user "Mission not found: {{args}}"
-
-   b. If {{args}} is empty (no arguments provided), find the most recent mission:
-      - Use list_directory to list ~/.gemini-mc/missions/
-      - For each subdirectory that starts with "mis_", use read_file to read <dir>/state.json
-      - Parse the updatedAt field (ISO-8601 format) from each state.json
-      - Select the mission with the latest updatedAt value
-      - If no mission directories exist, tell the user "No missions found. Use /mission-start to create one."
-
-2. Once you have the state.json content, also read features.json from the same mission directory to determine the current milestone:
-   - Use read_file to read features.json from the same mission directory (e.g. ~/.gemini-mc/missions/mis_<id>/features.json)
-   - Look through the "features" array and find the first feature object whose "status" field equals "pending"
-   - Extract that feature's "milestone" field — this is the current milestone
-   - If no features have status "pending" (all are completed or cancelled, or the array is empty), the current milestone is "all complete"
-
-3. Display the mission status in this exact format:
-
+3. Display:
    Mission ID: <missionId>
    State: <state>
-   Progress: <completedFeatures>/<totalFeatures> features completed
+   Progress: <completedFeatures>/<totalFeatures> features
    Current Milestone: <milestone>
    Working Directory: <workingDirectory>
    Last Updated: <updatedAt>
-
-   Where <milestone> is the current milestone derived from step 2 (either the milestone field of the first pending feature, or "all complete" if none are pending).
-
-If state.json or features.json is malformed or missing required fields, report the error clearly.
 """

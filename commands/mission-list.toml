@@ -1,27 +1,8 @@
 description = "List all missions and their current states"
 prompt = """
-The user wants to see all missions. List every mission in the ~/.gemini-mc/missions/ directory.
+List all missions. Run: `ls -d ~/.gemini-mc/missions/mis_*/ 2>/dev/null`
 
-Follow these steps:
+No missions → "No missions found. Use /mission-start to create one."
 
-1. List all directories in ~/.gemini-mc/missions/ by running:
-   `ls -d ~/.gemini-mc/missions/mis_*/ 2>/dev/null`
-
-2. If no mission directories exist, tell the user: "No missions found. Use /mission-start to create a new mission."
-
-3. For each mission directory found, read its state.json file to extract:
-   - missionId
-   - state
-   - updatedAt
-
-4. Display the results as a formatted table:
-
-   | Mission ID    | State           | Last Updated             |
-   |---------------|-----------------|--------------------------|
-   | mis_abc123    | planning        | 2025-01-15T10:30:00Z     |
-   | mis_def456    | completed       | 2025-01-14T08:00:00Z     |
-
-Sort the table by updatedAt (most recent first).
-
-If any state.json is missing or malformed, show the mission ID with state "unknown" and note the error.
+For each mission dir, read state.json and extract missionId, state, updatedAt. Display as table sorted by updatedAt (most recent first). If state.json missing/malformed, show state as "unknown".
 """

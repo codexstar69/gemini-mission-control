@@ -1,49 +1,16 @@
 description = "Override a failed validator with documented justification"
 prompt = """
-The user wants to override a failed validation. Justification: {{args}}
+Override failed validation. Justification: {{args}}
 
-Follow these steps:
-
-1. If {{args}} is empty, tell the user: "Please provide a justification for the override. Usage: /mission-override <justification>"
-
-2. Find the most recently updated mission:
-   - Use list_directory to list ~/.gemini-mc/missions/
-   - Read each mission's state.json and compare updatedAt timestamps
-   - Select the mission with the most recent updatedAt
-   If no missions exist, tell the user: "No missions found. Nothing to override."
-
-3. Read the mission's state.json and features.json.
-
-4. Find all validator features that have failed (features with IDs matching "scrutiny-validator-*" or "user-testing-validator-*" whose status is "pending" or where the most recent handoff indicates failure). Also check for features that are blocked due to failed validation.
-
-5. If no failed validators are found, tell the user: "No failed validators found. There is nothing to override."
-
-6. For each failed validator feature found:
-   a. Mark the feature's status as "completed" in features.json
-   b. Increment completedFeatures in state.json
-   c. Read the existing synthesis report (if any) at .mission/validation/<milestone>/<validator-type>/synthesis.json
-      (where <validator-type> is "scrutiny" for scrutiny-validator-* or "user-testing" for user-testing-validator-*)
-   d. Update or create the synthesis report with the override information:
-      {
-        "overridden": true,
-        "overriddenAt": "<ISO 8601 timestamp>",
-        "justification": "{{args}}",
-        "originalResult": "<previous result if available>"
-      }
-
-7. Check milestone sealing: For each milestone where BOTH the scrutiny-validator and user-testing-validator
-   are now completed (whether by passing or override), add that milestone to the sealedMilestones array
-   in state.json. This prevents future features from being added to validated milestones.
-
-8. Log the override event to progress_log.jsonl by appending:
-   {"timestamp": "<ISO 8601>", "event": "validation_overridden", "justification": "{{args}}", "features": ["<overridden feature IDs>"]}
-
-9. Update the state.json updatedAt timestamp.
-
-10. Confirm to the user:
-    - Mission ID: <missionId>
-    - Overridden validators: <list of validator feature IDs>
-    - Justification recorded: "{{args}}"
-    - Milestones sealed: <list of newly sealed milestones, if any>
-    - Message: "Validation override applied. The justification has been recorded in the synthesis report. You may now continue with /mission-run."
+1. If {{args}} empty → "Please provide justification. Usage: /mission-override <justification>"
+2. Find most recent mission (list dirs, compare updatedAt). No missions → tell user.
+3. Read state.json and features.json.
+4. Find failed validators: features with IDs matching `scrutiny-validator-*` or `user-testing-validator-*` with status=`pending` or failed handoff. None found → "No failed validators to override."
+5. For each failed validator:
+   a. Set status=`completed`, increment completedFeatures
+   b. Update/create synthesis report at `.mission/validation/<milestone>/<type>/synthesis.json` with: `{"overridden":true,"overriddenAt":"<ISO>","justification":"{{args}}","originalResult":"..."}`
+6. Seal milestones where BOTH scrutiny + user-testing validators now completed → add to sealedMilestones
+7. Log `validation_overridden` event to progress_log.jsonl
+8. Update updatedAt in state.json
+9. Confirm: mission ID, overridden validators, justification, sealed milestones, "Continue with /mission-run"
 """

@@ -1,30 +1,9 @@
 description = "Activate the mission planner to begin interactive planning"
 prompt = """
-The user wants to plan the current active mission. Arguments: {{args}}
+Plan the active mission. Args: {{args}}
 
-Follow these steps:
-
-1. Find the active mission. If {{args}} contains a mission ID, use it. Otherwise, find the most recently updated mission:
-   `ls -td ~/.gemini-mc/missions/mis_*/ 2>/dev/null | head -1`
-   If no missions exist, tell the user: "No missions found. Use /mission-start to create one first."
-
-2. Read the mission's state.json to verify the mission is in the "planning" state.
-   If the state is not "planning", tell the user: "This mission is in state '<current_state>'. The /mission-plan command can only be used when the mission is in the 'planning' state."
-
-3. Read the mission's working directory from state.json. You will need both:
-   - The mission directory path: ~/.gemini-mc/missions/mis_<id>/
-   - The working directory path from state.json's workingDirectory field
-
-4. Use activate_skill to load the mission-planner skill. This will provide the complete 7-phase interactive planning procedure:
-   - Phase 1: Understand requirements (Q&A with the user)
-   - Phase 2: Investigate the codebase in the working directory
-   - Phase 3: Identify milestones (vertical slices)
-   - Phase 4: Confirm milestones with the user
-   - Phase 5: Plan infrastructure and boundaries
-   - Phase 6: Plan testing strategy
-   - Phase 7: Generate mission artifacts in the mission directory (validation-contract.md, features.json, AGENTS.md, validation-state.json) and scaffold .mission/ in the working directory
-
-5. Follow the mission-planner skill's instructions. The skill will guide you through generating all required artifacts and transitioning the mission state from "planning" to "orchestrator_turn".
-
-Begin by reading the mission state from the mission directory, then call activate_skill to load the mission-planner skill.
+1. Find mission: if {{args}} has ID, use it; else most recent. No missions → "Use /mission-start first."
+2. Read state.json. State must be `planning`; otherwise error with current state.
+3. Get mission dir path and workingDirectory from state.json.
+4. Call activate_skill to load `mission-planner`. Follow its 7-phase procedure to generate all artifacts and transition to `orchestrator_turn`.
 """

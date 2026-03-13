@@ -1,36 +1,11 @@
 description = "Resume a paused mission"
 prompt = """
-The user wants to resume a paused mission. Arguments: {{args}}
+Resume paused mission. Args: {{args}}
 
-Follow these steps:
-
-1. Find the mission. If {{args}} contains a mission ID, use it. Otherwise, find the most recently updated mission:
-   `ls -td ~/.gemini-mc/missions/mis_*/ 2>/dev/null | head -1`
-   If no missions exist, tell the user: "No missions found. Nothing to resume."
-
-2. Read the mission's state.json file.
-
-3. Verify the mission is in the "paused" state.
-   If the state is not "paused", tell the user: "This mission is in state '<current_state>', not 'paused'. Only paused missions can be resumed."
-
-4. Check the progress_log.jsonl to determine if the mission was paused due to budget exceeded:
-   - Read the last few entries in progress_log.jsonl
-   - Look for an event with "reason": "budget_exceeded"
-   - If the pause was budget-related, inform the user: "This mission was paused because the token budget was exceeded. Resuming will continue to consume tokens. Do you want to proceed?"
-   - Wait for user acknowledgment before proceeding if it was a budget pause.
-
-5. Transition the mission from "paused" to "orchestrator_turn":
-   - Read the current state.json
-   - Update the "state" field to "orchestrator_turn"
-   - Update the "updatedAt" field to the current ISO 8601 timestamp
-   - Write the updated state.json back to the file
-
-6. Log the resume event to progress_log.jsonl by appending a JSON line:
-   {"timestamp": "<ISO 8601>", "event": "state_transition", "from": "paused", "to": "orchestrator_turn", "reason": "user_requested"}
-
-7. Confirm to the user:
-   - Mission ID: <missionId>
-   - Previous State: paused
-   - New State: orchestrator_turn
-   - Message: "Mission resumed. Run /mission-run to continue the orchestrator loop."
+1. Find mission: if {{args}} has ID, use it; else most recent. No missions → tell user.
+2. Read state.json. Must be `paused`; otherwise error.
+3. Check progress_log.jsonl for budget_pause. If budget-paused → warn user about continued token usage, wait for acknowledgment.
+4. Set state=`orchestrator_turn`, update updatedAt, write state.json.
+5. Log: `{"event":"state_transition","from":"paused","to":"orchestrator_turn","reason":"user_requested"}`
+6. Confirm: Mission ID, "Mission resumed. Run /mission-run to continue."
 """
