@@ -1,0 +1,55 @@
+{
+  "flowId": "orchestrator-validation-b",
+  "assertions": [
+    {
+      "assertionId": "VAL-VALID-003",
+      "status": "passed",
+      "evidence": [
+        "Step 8.1 (lines 458-471): Orchestrator separates implementation features (IDs not starting with scrutiny-validator- or user-testing-validator-) from validator features, and checks if ALL implementation features have status completed or cancelled",
+        "Step 8.2 (lines 473-534): When all implementation features are done AND milestone not in milestonesWithValidationPlanned, two validator features are injected",
+        "scrutiny-validator-<milestone> feature created with: id pattern 'scrutiny-validator-<milestone>', skillName 'scrutiny-validator', preconditions [], status 'pending' (line 485-499)",
+        "user-testing-validator-<milestone> feature created with: id pattern 'user-testing-validator-<milestone>', skillName 'user-testing-validator', preconditions ['scrutiny-validator-<milestone>'], status 'pending' (line 504-520)",
+        "Line 521 explicitly states: 'The user-testing validator depends on the scrutiny validator (preconditions includes scrutiny-validator-<milestone>). This ensures code quality gates pass before behavioral testing.'",
+        "Both features added to features array, milestone added to milestonesWithValidationPlanned, totalFeatures incremented by 2 (lines 523-527)",
+        "validation_injected event logged with both feature IDs (line 533)"
+      ],
+      "notes": "All required elements present: auto-injection at milestone boundary, correct feature ID patterns (scrutiny-validator-<milestone> and user-testing-validator-<milestone>), precondition ordering (user-testing depends on scrutiny), both created with status 'pending'."
+    },
+    {
+      "assertionId": "VAL-VALID-004",
+      "status": "passed",
+      "evidence": [
+        "Step 8.3 (lines 536-565): After user-testing-validator completes, milestone added to sealedMilestones in state.json (line 540)",
+        "Sealed Milestone Enforcement section (lines 550-562) specifies 4 enforcement points:",
+        "1. Option A (line 554): Before assigning follow-up to original milestone, check sealedMilestones; if sealed redirect to misc-*",
+        "2. Option D (line 556): Misc features always go to misc-* milestones",
+        "3. Scope Change Adding Requirements (line 558): Check sealedMilestones; if sealed direct to misc-* or new milestone. 'Never unseal a milestone.'",
+        "4. General addFeature guard (line 560): 'Whenever adding ANY new feature to features.json, check if target milestone is in sealedMilestones. If it is, reject the assignment and redirect to misc-*'",
+        "Option A in Decision Tree (line 318): Explicit sealed milestone check: 'Before assigning the follow-up feature to the original feature's milestone, check if that milestone is in sealedMilestones. If it IS sealed, assign the follow-up to a misc-* milestone instead... Never add features to a sealed milestone.'",
+        "Scope Change Adding Requirements (line 589): 'If the target milestone is sealed, direct the new feature to a misc-* milestone or create a new milestone.'",
+        "sealed_milestone_rejected event logged with warning (line 561)"
+      ],
+      "notes": "All required elements present: sealedMilestones check enforced in Option A, Option D, Scope Change, and a general addFeature guard. Sealed milestone enforcement described for all feature addition paths."
+    },
+    {
+      "assertionId": "VAL-VALID-007",
+      "status": "passed",
+      "evidence": [
+        "mission-override.toml exists at commands/mission-override.toml with description='Override a failed validator with documented justification' and a prompt field containing the override procedure",
+        "SKILL.md contains full 'Validation Override Protocol' section (lines 794-857)",
+        "Override Procedure Step 1 (line 808): Validates justification is non-empty, rejects if empty",
+        "Override Procedure Step 2 (line 810): Identifies failed validators by scanning features.json for scrutiny-validator-* or user-testing-validator-* with status pending",
+        "Override Procedure Step 3 (lines 812-814): Marks validator features as completed, increments completedFeatures",
+        "Override Procedure Step 4 (lines 816-828): Records justification in synthesis report at .mission/validation/<milestone>/<validator-type>/synthesis.json with fields: overridden, overriddenAt, justification, originalStatus, originalFindings",
+        "Override Procedure Step 5 (line 830): Seals milestone after both validators completed (by override or passing)",
+        "Override Procedure Step 6 (lines 832-834): Logs validation_overridden event to progress_log.jsonl",
+        "Override command prompt field (mission-override.toml) includes matching procedure: mark completed, increment completedFeatures, record justification in synthesis report, check milestone sealing, log event",
+        "Override Rules (lines 850-855): Non-empty justification required, permanently recorded for audit, milestone sealed afterward, does NOT change validation-state.json assertion statuses"
+      ],
+      "notes": "Override command exists with prompt field, orchestrator skill has complete override protocol section. Override marks features as completed and records justification in synthesis report. Both the TOML command and SKILL.md contain consistent, thorough override procedures."
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["Read", "Grep"]
+}

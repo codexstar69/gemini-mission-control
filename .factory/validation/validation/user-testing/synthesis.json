@@ -1,0 +1,28 @@
+{
+  "milestone": "validation",
+  "round": 1,
+  "status": "pass",
+  "assertionsSummary": {
+    "total": 11,
+    "passed": 11,
+    "failed": 0,
+    "blocked": 0
+  },
+  "passedAssertions": [
+    "VAL-VALID-001",
+    "VAL-VALID-002",
+    "VAL-VALID-003",
+    "VAL-VALID-004",
+    "VAL-VALID-005",
+    "VAL-VALID-006",
+    "VAL-VALID-007",
+    "VAL-VALID-008",
+    "VAL-CROSS-001",
+    "VAL-CROSS-002",
+    "VAL-CROSS-005"
+  ],
+  "failedAssertions": [],
+  "blockedAssertions": [],
+  "appliedUpdates": [],
+  "previousRound": null
+}

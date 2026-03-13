@@ -1,0 +1,53 @@
+{
+  "flowId": "cross-area-c",
+  "assertions": [
+    {
+      "assertionId": "VAL-CROSS-001",
+      "status": "passed",
+      "evidence": [
+        "commands/mission-start.toml: prompt calls scripts/scaffold-mission.sh which creates ~/.gemini-mc/missions/mis_<id>/ with state.json initialized to \"state\": \"planning\" (confirmed in scaffold-mission.sh lines using python3 json.dump with 'state': 'planning')",
+        "commands/mission-plan.toml: prompt reads state.json, verifies state is 'planning', then calls activate_skill to load mission-planner skill for 7-phase planning",
+        "skills/mission-planner/SKILL.md: Phase 7.7 specifies state transition from 'planning' to 'orchestrator_turn' after generating all artifacts (validation-contract.md, features.json, validation-state.json, AGENTS.md, .mission/ directory) and passing the coverage gate",
+        "commands/mission-run.toml: prompt reads state.json, verifies state is 'orchestrator_turn', then calls activate_skill to load mission-orchestrator skill for autonomous run loop",
+        "skills/mission-orchestrator/SKILL.md: Step 4 dispatches workers (state → worker_running), Step 5 parses handoffs (state → handoff_review), Step 6 applies decision tree (Options A/B/C/D), Step 7 updates state back to orchestrator_turn, Step 8 checks milestone completion and injects scrutiny-validator + user-testing-validator features with correct precondition ordering (user-testing depends on scrutiny)",
+        "skills/mission-orchestrator/SKILL.md Section 8.3: After user-testing-validator passes, milestone is sealed (added to sealedMilestones)",
+        "skills/mission-orchestrator/SKILL.md Section 8.4: When ALL features are completed/cancelled and all milestones sealed, state transitions to 'completed' — full lifecycle end",
+        "GEMINI.md Section 7.2: State machine defines full lifecycle transitions: planning → orchestrator_turn → worker_running → handoff_review → orchestrator_turn → completed, matching all command and skill specifications",
+        "GEMINI.md Section 7.4: Milestone lifecycle documented: Implementation → Validation Injection → Validation Execution → Sealing, confirming auto-inject of validators and milestone sealing"
+      ],
+      "notes": "Full lifecycle is completely specified across declarative files. The chain mission-start.toml → scaffold-mission.sh → mission-plan.toml → mission-planner/SKILL.md → mission-run.toml → mission-orchestrator/SKILL.md covers all state transitions from planning through completed. The state machine in GEMINI.md Section 7 documents all valid states and transitions consistently with the skill implementations."
+    },
+    {
+      "assertionId": "VAL-CROSS-002",
+      "status": "passed",
+      "evidence": [
+        "scripts/scaffold-mission.sh: writes state files to ~/.gemini-mc/missions/mis_<MISSION_ID>/ (line: MISSION_DIR=\"$HOME/.gemini-mc/missions/mis_${MISSION_ID}\") — all state is disk-persisted from creation",
+        "hooks/hooks.json: registers SessionStart hook with matcher '*' that runs scripts/session-context.sh — this fires on every Gemini CLI session start",
+        "scripts/session-context.sh: scans ~/.gemini-mc/missions/ for all mis_*/ directories, reads state.json from each, finds the most recently updated active mission (skips completed/failed), and outputs mission ID, state, progress, working directory, and suggested next action — provides full context reload on session restart",
+        "commands/mission-status.toml: reads state.json and features.json directly from ~/.gemini-mc/missions/mis_<id>/ using read_file tool (no in-memory state dependency), displays mission ID, state, progress, current milestone, working directory, and last updated time",
+        "commands/mission-resume.toml: reads state.json from ~/.gemini-mc/missions/, verifies state is 'paused', transitions to 'orchestrator_turn', checks progress_log.jsonl for budget-pause reason — all from persisted disk state",
+        "GEMINI.md Section 8 'Cross-Session Persistence': explicitly documents that all state changes are immediately written to disk via write_file, there is no in-memory-only state, and missions survive Gemini CLI session restarts",
+        "GEMINI.md Section 8.2: documents the SessionStart hook behavior — session-context.sh scans missions, finds active mission, outputs context for automatic reload",
+        "GEMINI.md Section 8.3: documents cross-session command behavior for each state (planning → /mission-plan resumes, orchestrator_turn → /mission-run continues, paused → /mission-resume resumes, worker_running → crash recovery)",
+        "skills/mission-orchestrator/SKILL.md Step 1.2: crash recovery reads progress_log.jsonl to find stuck features when state is worker_running after session restart, resets them to pending"
+      ],
+      "notes": "State persistence across sessions is correctly designed. State files are written to ~/.gemini-mc/missions/ on disk. The SessionStart hook in hooks.json triggers session-context.sh which reloads active mission context on every new Gemini CLI session. All commands (mission-status, mission-resume, mission-run) read directly from persisted disk files. Crash recovery handles the edge case of interrupted worker sessions."
+    },
+    {
+      "assertionId": "VAL-CROSS-005",
+      "status": "passed",
+      "evidence": [
+        "skills/mission-planner/SKILL.md Phase 7.2 'Coverage Gate' section: explicitly defines the coverage gate procedure — (1) parse validation-contract.md to extract all VAL-[A-Z]+-[0-9]{3} IDs, (2) collect all IDs from features' fulfills arrays, (3) check for orphan assertions (IDs in contract not claimed by any feature), (4) check for duplicate claims (IDs claimed by more than one feature), (5) fix any violations before proceeding",
+        "skills/mission-planner/SKILL.md Phase 7.2: states 'Do NOT proceed to state transition if the coverage gate fails. The plan is incomplete until every assertion has exactly one responsible feature.'",
+        "skills/mission-planner/SKILL.md Phase 7.7 'Pre-Transition Coverage Gate Verification (MANDATORY)': a second enforcement point — before writing the state transition from planning to orchestrator_turn, the planner MUST re-verify the coverage gate: (1) re-extract all VAL IDs from validation-contract.md, (2) re-extract all fulfills IDs from features.json, (3) verify no orphan assertions, no duplicate claims, no phantom references",
+        "skills/mission-planner/SKILL.md Phase 7.7: states 'If ANY of these checks fail, STOP. Do NOT transition to orchestrator_turn. Instead: Report the specific violations to the user (list orphan IDs, duplicate IDs, or phantom IDs). Fix the violations by updating features.json and/or validation-contract.md. Re-run this verification until it passes.'",
+        "skills/mission-planner/SKILL.md Phase 7.7: states 'This gate is non-negotiable. The plan is incomplete until every assertion has exactly one responsible feature, and every feature's fulfills references only valid assertion IDs.'",
+        "GEMINI.md Section 7.3 Transition Rule 1: documents that the planning → orchestrator_turn transition requires 'coverage gate verification passed (every VAL assertion ID in the contract claimed by exactly one feature's fulfills array — no orphans, no duplicates, no phantom references)' and 'This transition is blocked if the coverage gate fails.'"
+      ],
+      "notes": "The coverage gate is enforced at two points in the planner skill: once during Phase 7.2 (features.json generation) and again in Phase 7.7 (mandatory pre-transition verification). Both checks verify that every VAL assertion ID is claimed by exactly one feature, with no orphans, duplicates, or phantom references. The gate blocks the planning → orchestrator_turn transition if it fails. GEMINI.md independently documents the same requirement in the state machine transition rules."
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["Read", "LS", "Glob", "Grep"]
+}

@@ -1,0 +1,83 @@
+{
+  "flowId": "validator-agents-a",
+  "assertions": [
+    {
+      "assertionId": "VAL-VALID-001",
+      "status": "passed",
+      "evidence": [
+        "Line 2: name: scrutiny-validator (exact match)",
+        "Line 4: kind: local (correct kind)",
+        "Lines 6-10: tools list includes read_file, run_shell_command, grep_search, list_directory, write_file — all four required tools present",
+        "Lines 27-28: Phase 2 'Hard-Gate Validation' — runs test/typecheck/lint commands from .mission/services.yaml",
+        "Lines 85-100: Discovers test/typecheck/lint from services.yaml and enforces hard gate",
+        "Lines 113-155: Phase 3 'Completed Feature Review' — reviews each completed feature's code changes via handoffs and file inspection",
+        "Lines 157-210: Phase 4 'Synthesis Report' — produces synthesis report to .mission/validation/<milestone>/scrutiny/synthesis.json"
+      ],
+      "notes": "All required frontmatter fields present and correct. Body contains complete validation procedure with hard-gate commands, feature review, and synthesis report generation."
+    },
+    {
+      "assertionId": "VAL-VALID-002",
+      "status": "passed",
+      "evidence": [
+        "Line 2: name: user-testing-validator (exact match)",
+        "Line 4: kind: local (correct kind)",
+        "Lines 6-11: tools list includes read_file, run_shell_command, grep_search, list_directory, write_file, google_web_search — appropriate tools",
+        "Line 28: Phase 1 reads validation-contract.md and determines assertions from features' fulfills fields",
+        "Lines 62-66: Phase 1.2 'Determine Assertions in Scope' — collects assertion IDs from completed features' fulfills arrays",
+        "Lines 87-117: Phase 2 'Environment Setup' — reads services.yaml, starts required services, prepares testing surface",
+        "Lines 119-170: Phase 3 'Assertion Testing' — tests each assertion and classifies as passed/failed/blocked",
+        "Lines 145-166: Phase 3.2 'Update validation-state.json' — explicitly instructs updating validation-state.json with results",
+        "Lines 180-222: Phase 4 'Synthesis Report' — writes report to .mission/validation/<milestone>/user-testing/synthesis.json"
+      ],
+      "notes": "All required frontmatter fields present and correct. Body contains complete procedure: read contract, determine testable assertions from fulfills, set up environment, test assertions, update validation-state.json, produce synthesis report."
+    },
+    {
+      "assertionId": "VAL-VALID-005",
+      "status": "passed",
+      "evidence": [
+        "GEMINI.md lines 127-141: validation-state.json schema defined with assertions object mapping VAL IDs to {status} where status is one of: pending, passed, failed, blocked",
+        "GEMINI.md line 141: 'status (string) — One of: pending, passed, failed, blocked.'",
+        "GEMINI.md lines 128-137: Example schema shows assertions object with VAL-XXX-001 through VAL-XXX-004 demonstrating all four status values",
+        "user-testing-validator.md lines 145-166: Phase 3.2 'Update validation-state.json' instructs updating this file for every tested assertion with status and evidence",
+        "mission-planner SKILL.md line 467-497: Section 7.3 'Initialize validation-state.json' instructs creating the file with every assertion ID initialized to pending",
+        "Actual validation-state.json in mission dir confirms schema: top-level assertions object with VAL-XXX-NNN keys each having a status field"
+      ],
+      "notes": "Schema is defined in GEMINI.md Section 3.3. User-testing validator explicitly references updating this file. Planner skill defines initialization. Actual mission file matches the schema."
+    },
+    {
+      "assertionId": "VAL-VALID-006",
+      "status": "passed",
+      "evidence": [
+        "scrutiny-validator.md line 32: 'Write a synthesis report to .mission/validation/<milestone>/scrutiny/synthesis.json'",
+        "scrutiny-validator.md line 165: Phase 4.1 repeats the path: '.mission/validation/<milestone>/scrutiny/synthesis.json'",
+        "scrutiny-validator.md line 263: Important Rule 5: 'Always write the synthesis report to .mission/validation/<milestone>/scrutiny/synthesis.json'",
+        "user-testing-validator.md line 34: 'Write a synthesis report to .mission/validation/<milestone>/user-testing/synthesis.json'",
+        "user-testing-validator.md line 188: Phase 4.1 repeats the path: '.mission/validation/<milestone>/user-testing/synthesis.json'",
+        "user-testing-validator.md line 286: Important Rule 7: 'Always write the synthesis report to .mission/validation/<milestone>/user-testing/synthesis.json'",
+        "GEMINI.md lines 55-58: .mission/validation/<milestone>/ directory structure shows scrutiny/synthesis.json and user-testing/synthesis.json"
+      ],
+      "notes": "Both validators specify the correct .mission/validation/<milestone>/ paths for their synthesis reports in multiple locations (core responsibilities, phase 4, and important rules)."
+    },
+    {
+      "assertionId": "VAL-VALID-008",
+      "status": "passed",
+      "evidence": [
+        "scrutiny-validator.md lines 64-77: Phase 1.3 'Check for Prior Synthesis' — reads existing report at .mission/validation/<milestone>/scrutiny/synthesis.json, extracts previously failed items, limits re-validation to those failures, still re-runs hard-gate commands",
+        "scrutiny-validator.md line 73: 'Extract the features, files, commands, or findings that previously failed.'",
+        "scrutiny-validator.md line 74: 'Limit re-validation to those failing areas instead of re-reviewing every successful area in full.'",
+        "scrutiny-validator.md line 77: 'If no prior report exists, perform a full scrutiny pass.'",
+        "scrutiny-validator.md lines 153-155: Phase 3.4 'Scope Re-Validation Intelligently' — concentrates review on previously failed items",
+        "scrutiny-validator.md line 262: Important Rule 4: 'Always check the previous synthesis report first when it exists, and only re-validate failed areas'",
+        "user-testing-validator.md lines 70-83: Phase 1.3 'Check for Prior Synthesis' — reads existing report at .mission/validation/<milestone>/user-testing/synthesis.json, extracts failed/blocked assertions, re-tests only those",
+        "user-testing-validator.md line 79: 'Extract assertions previously marked failed or blocked.'",
+        "user-testing-validator.md line 81: 'Do not spend time re-testing assertions that already passed and are unchanged.'",
+        "user-testing-validator.md line 83: 'If no prior report exists, perform a full test pass for all in-scope assertions.'",
+        "user-testing-validator.md line 285: Important Rule 6: 'Always check the previous synthesis report first and only re-test failures or blocked assertions'"
+      ],
+      "notes": "Both validators have explicit Phase 1.3 sections for checking prior synthesis reports and scoping re-validation to previously failed/blocked items. This is reinforced in their Important Rules sections."
+    }
+  ],
+  "frictions": [],
+  "blockers": [],
+  "toolsUsed": ["Read", "Grep", "LS"]
+}
