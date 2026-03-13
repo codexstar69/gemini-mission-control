@@ -11,6 +11,7 @@ Drives the autonomous run loop: read state → evaluate DAG → dispatch worker 
 - `/mission-run` with state=`orchestrator_turn`
 - `/mission-resume` after pause
 - Re-entry after crash recovery
+- **Single-session constraint:** only one orchestrator session should run per mission at a time. Concurrent sessions on the same mission can corrupt state.
 
 ## Prerequisites
 1. Mission dir exists at `~/.gemini-mc/missions/mis_<id>/`
