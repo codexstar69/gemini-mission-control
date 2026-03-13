@@ -64,13 +64,7 @@ Each feature requires:
 
 Before proceeding, verify:
 1. **No duplicate feature IDs** — every feature `id` must be unique across all milestones. Duplicate IDs cause handoff file conflicts and ambiguous precondition resolution.
-2. **No cycles** — use topological sort:
-
-1. For each feature, compute its in-degree (number of features it depends on)
-2. Initialize a queue with all features that have in-degree 0
-3. While queue is non-empty: dequeue a feature, decrement in-degree of all features that list it as a precondition, enqueue any that reach in-degree 0
-4. If the number of processed features equals total features → graph is acyclic ✓
-5. If not → cycle detected → restructure: merge tightly coupled features, remove soft dependencies, or reorder milestones
+2. **No cycles** — verify the precondition graph is acyclic via topological sort. If cycles exist → restructure: merge tightly coupled features, remove soft dependencies, or reorder milestones.
 
 **Never proceed to Phase 4 with cyclic dependencies.** Also avoid long dependency chains (>5 deep) which block parallelism and increase risk of partial-completion cascades.
 
