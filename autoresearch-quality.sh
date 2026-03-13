@@ -294,6 +294,23 @@ else
 fi
 
 echo ""
+echo "=== 29. SCAFFOLD + VALIDATE ROUND-TRIP ==="
+test_id="q$(date +%s | tail -c 6)"
+test_dir="/tmp/scaffold-test-$$"
+mkdir -p "$test_dir"
+if bash scripts/scaffold-mission.sh "$test_id" "$test_dir" >/dev/null 2>&1; then
+  if bash scripts/validate-state.sh "$test_id" 2>&1 | rg -q "VALID"; then
+    pass "Scaffold → validate round-trip passes"
+  else
+    fail "Scaffolded state.json fails validation"
+  fi
+  rm -rf "$HOME/.gemini-mc/missions/mis_${test_id}"
+else
+  fail "scaffold-mission.sh failed"
+fi
+rm -rf "$test_dir"
+
+echo ""
 echo "=== SUMMARY ==="
 echo "Errors: $ERRORS"
 echo "Warnings: $WARNINGS"
