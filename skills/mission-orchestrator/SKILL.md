@@ -165,8 +165,8 @@ Evaluate the handoff against these options **in order**. Apply the **first** mat
 **Action:**
 1. Mark the original feature as `"completed"`, increment `completedFeatures`
 2. For each medium/low issue, create a feature in a `misc-*` milestone:
-   - Find the current misc milestone (`misc-1`, `misc-2`, etc.)
-   - If it already has 5 features, create the next one (`misc-2`, `misc-3`, ...)
+   - Find the current misc milestone by scanning `features.json` for features with `milestone` starting with `misc-`. If none exist, create `misc-1`.
+   - If the current misc milestone already has 5 features, create the next one (`misc-2`, `misc-3`, ...)
    - Set: `skillName`=`"code-quality-worker"` (or `"mission-worker"` if implementation needed), `preconditions`=`[]`, `fulfills`=`[]`, `status`=`"pending"`
 3. Update `totalFeatures` to reflect new features
 
