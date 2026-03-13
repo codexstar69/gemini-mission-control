@@ -44,6 +44,8 @@ Read these files from the mission directory:
 
 ## Step 2: Evaluate Feature DAG
 
+**Pre-check: validate precondition references.** For each feature, verify that every ID in its `preconditions` array matches the `id` of another feature in `features.json`. If a precondition references a non-existent feature ID, this is a **dangling reference** — log a warning (`{"event":"dangling_precondition","featureId":"<id>","missingPrecondition":"<missing-id>"}`) and treat that precondition as satisfied (so the feature is not permanently blocked by a typo).
+
 A feature is **ready** when:
 - Its `status` is `"pending"`
 - ALL of its `preconditions` reference features whose `status` is `"completed"` **or** `"cancelled"` (cancelled features count as satisfied dependencies)

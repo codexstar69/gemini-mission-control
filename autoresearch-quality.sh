@@ -531,6 +531,14 @@ else
 fi
 
 echo ""
+echo "=== 53. ORCHESTRATOR: Dangling precondition validation ==="
+if grep -q "dangling\|non-existent\|missing.*precondition" "$ORCH" 2>/dev/null; then
+  pass "Dangling precondition references are handled"
+else
+  fail "No handling for dangling precondition references — typos cause silent deadlock"
+fi
+
+echo ""
 echo "=== SUMMARY ==="
 echo "Errors: $ERRORS"
 echo "Warnings: $WARNINGS"
