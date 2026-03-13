@@ -470,6 +470,59 @@ else
 fi
 
 echo ""
+echo "=== 46. ORCHESTRATOR: Step 3 worker prompt includes all 7 context items ==="
+ORCH="skills/mission-orchestrator/SKILL.md"
+for ctx in "services.yaml" "library/" "AGENTS.md" "validation" "handoff" "messages.jsonl" "init.sh"; do
+  if grep -qi "$ctx" "$ORCH" 2>/dev/null; then
+    pass "Step 3 references $ctx"
+  else
+    fail "Step 3 missing reference to $ctx"
+  fi
+done
+
+echo ""
+echo "=== 47. ORCHESTRATOR: Deadlock detection ==="
+if grep -q "deadlock" "$ORCH" 2>/dev/null; then
+  pass "Deadlock detection documented"
+else
+  fail "Deadlock detection missing from orchestrator"
+fi
+
+echo ""
+echo "=== 48. ORCHESTRATOR: Budget enforcement ==="
+if grep -q "budget" "$ORCH" 2>/dev/null; then
+  pass "Budget enforcement documented"
+else
+  fail "Budget enforcement missing from orchestrator"
+fi
+
+echo ""
+echo "=== 49. PLANNER: DAG acyclicity check ==="
+if grep -q "topological\|acycl\|cycle" "$PLAN" 2>/dev/null; then
+  pass "DAG acyclicity check documented in planner"
+else
+  fail "DAG acyclicity check missing from planner"
+fi
+
+echo ""
+echo "=== 50. AGENTS: Workers produce handoff as LAST JSON block ==="
+for agent in agents/mission-worker.md agents/code-quality-worker.md agents/scrutiny-validator.md agents/user-testing-validator.md; do
+  if grep -qi "last.*json\|last thing\|final output" "$agent" 2>/dev/null; then
+    pass "$(basename $agent) specifies handoff is last output"
+  else
+    fail "$(basename $agent) does not specify handoff position"
+  fi
+done
+
+echo ""
+echo "=== 51. ORCHESTRATOR: All state transitions log updatedAt ==="
+if grep -c "updatedAt" "$ORCH" 2>/dev/null | grep -q '[3-9]\|[1-9][0-9]'; then
+  pass "updatedAt referenced multiple times in state transitions"
+else
+  fail "updatedAt may not be referenced in all state transitions"
+fi
+
+echo ""
 echo "=== SUMMARY ==="
 echo "Errors: $ERRORS"
 echo "Warnings: $WARNINGS"
