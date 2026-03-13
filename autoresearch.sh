@@ -75,6 +75,12 @@ hot_path=$((gemini_md + orchestrator))
 # "full_bytes" = every instruction file in the extension
 total=$((gemini_md + orchestrator + planner + worker_skills + agents_total + commands_total))
 
+# === QUALITY CHECK ===
+if ! bash autoresearch-quality.sh >/dev/null 2>&1; then
+  echo "QUALITY CHECK FAILED — run bash autoresearch-quality.sh for details"
+  exit 1
+fi
+
 echo "=== RESULTS ==="
 echo "total_bytes: ${total}"
 echo "hot_path_bytes: ${hot_path}"
