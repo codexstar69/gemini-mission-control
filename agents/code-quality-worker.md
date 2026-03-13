@@ -9,6 +9,8 @@ tools:
   - run_shell_command
   - grep_search
   - list_directory
+  - glob
+  - read_many_files
 model: gemini-2.5-pro
 temperature: 0.1
 max_turns: 60
