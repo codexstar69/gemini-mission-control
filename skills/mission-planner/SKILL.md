@@ -8,8 +8,31 @@ description: Interactive 7-phase mission planning procedure
 Transforms a project description into complete mission artifacts through 7 interactive phases. This is a conversation with the user — present findings, ask for confirmation, iterate on feedback.
 
 ## Activation
-- `/mission-plan` with state=`planning`
+- `/mission-plan` with state=`planning` — **interactive mode** (default)
+- `/mission-auto` with state=`planning` — **headless mode** (no user interaction)
 - Mission dir must exist at `~/.gemini-mc/missions/mis_<id>/`
+
+---
+
+## Headless Mode
+
+When activated from `/mission-auto`, run ALL 7 phases without asking the user any questions:
+
+- **Phase 1:** Skip clarifying questions. Infer requirements from the description and codebase investigation. Choose the simpler interpretation when ambiguous.
+- **Phase 2:** Run codebase investigation identically to interactive mode.
+- **Phase 3:** Identify milestones identically. Still enforce DAG acyclicity.
+- **Phase 4:** Skip user confirmation. Proceed immediately after Phase 3.
+- **Phase 5:** Plan infrastructure identically. Choose standard ports (3000 for web, 5432 for Postgres, 6379 for Redis, etc.).
+- **Phase 6:** Plan testing identically.
+- **Phase 7:** Generate artifacts identically. Still enforce coverage gate.
+
+**Decision heuristics for headless mode:**
+- Tech stack: use whatever the existing codebase uses. Greenfield → use the stack mentioned in the description, or default to TypeScript + Node.
+- Features: prefer fewer, larger milestones (3–5 features each) over many small ones.
+- Ambiguous requirements: implement the minimal viable interpretation. Workers can expand later.
+- Testing: default to unit + integration tests. Skip e2e unless the description explicitly mentions it.
+
+All quality gates (DAG acyclicity, coverage gate, pre-transition verification) are **mandatory in both modes**. Headless mode only skips user-facing questions and confirmations.
 
 ---
 

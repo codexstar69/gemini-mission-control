@@ -61,28 +61,62 @@ Gemini Mission Control replicates the orchestrator-worker-validator pattern (ins
 
 ## Quick Start
 
+### Option A: Fully Autonomous (one command)
+
 ```bash
-# 1. Open Gemini CLI
+# Open Gemini CLI
 gemini
 
-# 2. Create a new mission
+# Create, plan, and run — all in one go
+/mission-auto Build a REST API with user authentication and CRUD endpoints
+```
+
+That's it. The system scaffolds the mission, plans headlessly (no questions asked), and enters the autonomous orchestrator loop.
+
+### Option B: Interactive (step-by-step control)
+
+```bash
+# Open Gemini CLI
+gemini
+
+# 1. Create a new mission
 /mission-start Build a REST API with user authentication and CRUD endpoints
 
-# 3. Plan the mission interactively (7-phase planning procedure)
+# 2. Plan the mission interactively (7-phase planning procedure)
 /mission-plan
 
-# 4. Run the autonomous orchestrator loop
+# 3. Run the autonomous orchestrator loop
 /mission-run
 
-# 5. Check progress at any time
+# 4. Check progress at any time
 /mission-status
 ```
 
-The orchestrator will plan milestones, dispatch worker subagents to implement features, run validators at milestone boundaries, and complete the mission autonomously.
+The interactive flow lets you shape the plan — answer questions, confirm milestones, adjust scope — before autonomous execution begins.
 
 ## Commands
 
-Gemini Mission Control provides 9 slash commands for managing the full mission lifecycle:
+Gemini Mission Control provides 10 slash commands for managing the full mission lifecycle:
+
+### `/mission-auto <description>`
+
+Create, plan, and run a mission autonomously — all in one command. No questions asked.
+
+```
+/mission-auto Build a REST API with Express, PostgreSQL, and JWT auth
+```
+
+**What it does:**
+1. Generates a mission ID and scaffolds the mission directory
+2. Activates the mission planner in **headless mode** — investigates the codebase, identifies milestones, generates all artifacts, enforces quality gates — without asking any questions
+3. Transitions to `orchestrator_turn` and immediately enters the autonomous run loop
+4. Dispatches workers, validates milestones, and loops until the mission completes
+
+**When to use it:** You have a clear project description and want the system to just go. The planner makes reasonable decisions based on the description and codebase — choosing simpler interpretations when ambiguous.
+
+**When to use `/mission-start` + `/mission-plan` + `/mission-run` instead:** You want to review the plan, adjust milestones, or provide detailed requirements interactively before execution begins.
+
+---
 
 ### `/mission-start <description>`
 
@@ -290,6 +324,7 @@ gemini-mission-control-extension/
 │       └── SKILL.md               # Worker type design procedure
 │
 ├── commands/                      # Custom slash commands (TOML)
+│   ├── mission-auto.toml          # /mission-auto (one-command autonomous flow)
 │   ├── mission-start.toml         # /mission-start
 │   ├── mission-plan.toml          # /mission-plan
 │   ├── mission-run.toml           # /mission-run

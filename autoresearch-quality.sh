@@ -125,8 +125,8 @@ check_present "GEMINI.md" "coverage gate" "GEMINI.md references coverage gate"
 check_present "GEMINI.md" "sealedMilestones" "GEMINI.md references sealedMilestones"
 
 echo ""
-echo "=== 12. COMMANDS: All 9 commands exist ==="
-for cmd in mission-start mission-plan mission-run mission-status mission-list mission-pause mission-resume mission-export mission-override; do
+echo "=== 12. COMMANDS: All 10 commands exist ==="
+for cmd in mission-auto mission-start mission-plan mission-run mission-status mission-list mission-pause mission-resume mission-export mission-override; do
   if [ -f "commands/$cmd.toml" ]; then
     pass "$cmd.toml exists"
   else
@@ -138,6 +138,20 @@ echo ""
 echo "=== 13. COMMANDS: Key commands reference skills ==="
 check_present "commands/mission-plan.toml" "mission-planner|activate_skill" "mission-plan invokes planner skill"
 check_present "commands/mission-run.toml" "mission-orchestrator|activate_skill" "mission-run invokes orchestrator skill"
+
+echo ""
+echo "=== 13b. MISSION-AUTO: One-command flow references both skills ==="
+check_present "commands/mission-auto.toml" "mission-planner|activate_skill" "mission-auto invokes planner skill"
+check_present "commands/mission-auto.toml" "mission-orchestrator|activate_skill" "mission-auto invokes orchestrator skill"
+check_present "commands/mission-auto.toml" "scaffold-mission|scaffold" "mission-auto scaffolds mission"
+check_present "commands/mission-auto.toml" "headless|Headless|HEADLESS" "mission-auto triggers headless mode"
+
+echo ""
+echo "=== 13c. PLANNER: Headless mode documented ==="
+check_present "$PLAN" "Headless Mode|headless mode|HEADLESS MODE" "Planner documents headless mode"
+check_present "$PLAN" "Skip clarifying|Skip.*question|Skip user" "Planner headless skips user questions"
+check_present "$PLAN" "Skip user confirmation|Skip.*confirmation" "Planner headless skips user confirmation"
+check_present "$PLAN" "mandatory in both modes|quality gates" "Planner enforces gates in headless mode"
 
 echo ""
 echo "=== 14. DEFINE-WORKER-SKILLS: Critical content ==="

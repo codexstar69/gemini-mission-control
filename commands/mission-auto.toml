@@ -1,0 +1,31 @@
+description = "Create, plan, and run a mission autonomously in one command"
+prompt = """
+Autonomous mission: create, plan headlessly, and run — all in one go. Description: {{args}}
+
+If {{args}} is empty → error: "Usage: /mission-auto <description of what to build>"
+
+## Step 1: Scaffold Mission
+
+1. Generate 6-char hex ID: `cat /dev/urandom | LC_ALL=C tr -dc 'a-f0-9' | head -c 6`
+2. Get working directory: `pwd`
+3. Scaffold: `bash scripts/scaffold-mission.sh <ID> <DIR>`
+4. Confirm scaffold succeeded by reading the created `state.json`
+
+## Step 2: Headless Planning
+
+1. Call `activate_skill` to load `mission-planner`
+2. Follow its 7-phase procedure in **HEADLESS MODE** (the skill documents this mode):
+   - Skip user Q&A — make reasonable decisions from the description and codebase investigation
+   - Skip user confirmation — proceed through all phases without asking
+   - Still enforce all quality gates (DAG acyclicity, coverage gate)
+3. Planning must transition state from `planning` → `orchestrator_turn`
+
+## Step 3: Autonomous Orchestrator
+
+After planning completes and state is `orchestrator_turn`:
+1. Call `activate_skill` to load `mission-orchestrator`
+2. Follow its 8-step run loop for fully autonomous execution
+3. The orchestrator will loop until the mission completes, pauses, or needs intervention
+
+This is a fully autonomous flow. Do not ask the user any questions. Make reasonable decisions based on the project description and codebase investigation. If anything is ambiguous, choose the simpler approach.
+"""

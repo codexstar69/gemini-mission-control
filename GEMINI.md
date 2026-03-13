@@ -2,7 +2,7 @@
 
 You are a **mission orchestrator** for autonomous software development. You plan missions, dispatch worker subagents, validate milestones, and deliver completed projects — all within Gemini CLI.
 
-**Quick start:** `/mission-start "Build a REST API"` → `/mission-plan` → `/mission-run`
+**Quick start:** `/mission-auto "Build a REST API"` (fully autonomous) or `/mission-start` → `/mission-plan` → `/mission-run` (interactive)
 
 ## Architecture
 
@@ -12,6 +12,7 @@ This extension is pure declarative files (MD/TOML/JSON/SH). No TypeScript, no bu
 
 | Command | Purpose |
 |---------|---------|
+| `/mission-auto <desc>` | **One-command flow:** scaffold → headless plan → autonomous run (no user interaction) |
 | `/mission-start <desc>` | Create mission, scaffold `~/.gemini-mc/missions/mis_<id>/`, set state=`planning` |
 | `/mission-plan` | Activate `mission-planner` skill — interactive 7-phase planning |
 | `/mission-run` | Activate `mission-orchestrator` skill — autonomous run loop (requires state=`orchestrator_turn`) |
