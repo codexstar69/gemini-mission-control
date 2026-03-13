@@ -119,12 +119,14 @@ Evaluate the handoff against these options **in order**. Apply the **first** mat
 1. For each high-severity issue (or group related issues), create a follow-up feature
 2. Insert follow-up feature(s) at the **TOP** of the `features` array (highest priority)
 3. **Sealed milestone check:** if the original feature's milestone is in `sealedMilestones`, assign the follow-up to a `misc-*` milestone instead. Never add to a sealed milestone.
-4. Follow-up feature fields:
+4. Follow-up feature fields (ALL required):
    - `id`: `"fix-<original-feature-id>-<issue-index>"` (e.g., `fix-user-auth-001`)
    - `description`: issue description + suggested fix from handoff
    - `skillName`: same as original (or `code-quality-worker` for quality issues)
    - `milestone`: same as original (or `misc-*` if milestone is sealed)
    - `preconditions`: `["<original-feature-id>"]`
+   - `expectedBehavior`: `["<issue resolution criteria from discoveredIssues>"]`
+   - `verificationSteps`: copy from original feature (or add specific verification for the fix)
    - `fulfills`: `[]`
    - `status`: `"pending"`
 5. Mark the original feature as `"completed"` in `features.json`
