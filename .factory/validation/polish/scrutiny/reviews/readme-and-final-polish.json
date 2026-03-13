@@ -1,0 +1,30 @@
+{
+  "featureId": "readme-and-final-polish",
+  "milestone": "polish",
+  "reviewedAt": "2026-03-13T06:15:00Z",
+  "commitId": "b028afa",
+  "transcriptSkeletonReviewed": true,
+  "diffReviewed": true,
+  "status": "pass",
+  "codeReview": {
+    "summary": "The README.md is comprehensive (578 lines), well-structured, and accurately documents the extension. All 6 required sections are present: (1) Project description with Droid-parity vision mention, (2) Prerequisites with Gemini CLI v0.33+ and enableAgents, (3) Installation via `gemini extensions link .`, (4) All 9 commands documented with examples and output samples, (5) Architecture overview with extension structure diagram, subagent dispatch flow, state management tables, decision tree, and milestone validation, (6) File format reference for agent definitions, skill definitions, command definitions, hooks, and state schemas. The /mission-export command prompt correctly creates a tar.gz archive. `gemini extensions link .` exits 0. The extension manifest example in the README exactly matches the actual gemini-extension.json. The directory structure diagram accurately reflects the real project layout.",
+    "issues": [
+      {
+        "file": "README.md",
+        "line": 455,
+        "severity": "non_blocking",
+        "description": "The Skill Definition example shows `## When to Use This Skill` and `## Work Procedure` sections without the `---` closing frontmatter delimiter being explicitly shown in the example. The opening `---` is shown but the closing `---` is part of the implied format. This is minor — the existing example still conveys the correct format."
+      }
+    ]
+  },
+  "issues": [],
+  "sharedStateObservations": [
+    {
+      "target": "skills",
+      "description": "Worker's skillFeedback reports the 'extension-builder' skill was not found. The feature specifies skillName: 'extension-builder' but the worker couldn't locate it and proceeded without it. The skill exists at .factory/skills/extension-builder/SKILL.md in the mission's .factory directory but may not have been accessible to the worker.",
+      "recommendation": "Verify that the extension-builder skill is properly registered or adjust the feature's skillName to match available skills."
+    }
+  ],
+  "addressesFailureFrom": null,
+  "summary": "PASS. The README.md is comprehensive, accurate, and covers all required sections. All 9 commands are documented with usage examples and output samples. The installation instructions correctly reference `gemini extensions link .` which validates successfully (exit 0). The /mission-export command prompt correctly creates tar.gz archives. The architecture section includes a clear extension structure diagram, subagent dispatch flow diagram, state management tables, decision tree reference, and milestone validation lifecycle. File format reference covers extension manifest, agent definitions, skill definitions, command definitions, hooks configuration, and all state schemas. No blocking issues found."
+}

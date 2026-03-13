@@ -1,0 +1,53 @@
+{
+  "milestone": "polish",
+  "round": 1,
+  "status": "pass",
+  "validatorsRun": {
+    "json": {
+      "passed": true,
+      "command": "jq . gemini-extension.json hooks/hooks.json",
+      "exitCode": 0
+    },
+    "toml": {
+      "passed": true,
+      "command": "python3 -c \"import tomllib; tomllib.load(open('<file>','rb'))\" (for each commands/*.toml)",
+      "exitCode": 0
+    },
+    "shell": {
+      "passed": true,
+      "command": "bash -n scripts/*.sh (syntax check + executable check)",
+      "exitCode": 0
+    },
+    "extension-link": {
+      "passed": true,
+      "command": "gemini extensions link .",
+      "exitCode": 0
+    },
+    "agent-frontmatter": {
+      "passed": true,
+      "command": "Python YAML frontmatter validation for all agents/*.md (kind: local, valid tool names)",
+      "exitCode": 0
+    },
+    "skill-frontmatter": {
+      "passed": true,
+      "command": "Python YAML frontmatter validation for all skills/*/SKILL.md (name/dir match)",
+      "exitCode": 0
+    }
+  },
+  "reviewsSummary": {
+    "total": 1,
+    "passed": 1,
+    "failed": 0,
+    "failedFeatures": []
+  },
+  "blockingIssues": [],
+  "appliedUpdates": [],
+  "suggestedGuidanceUpdates": [],
+  "rejectedObservations": [
+    {
+      "observation": "Worker's skillFeedback reports the 'extension-builder' skill was not found. The feature specifies skillName: 'extension-builder' but the worker couldn't locate it and proceeded without it.",
+      "reason": "This is a Factory platform concern (skill loading during worker dispatch), not a project issue. The extension-builder skill is an infrastructure skill provided by the Factory mission system, not a skill that belongs to this declarative extension project. No action needed within the project."
+    }
+  ],
+  "previousRound": null
+}
