@@ -4,7 +4,7 @@ Create new mission. Description: {{args}}
 
 If {{args}} is empty → ask user to describe what they want to build.
 
-1. Generate 6-char hex ID: `cat /dev/urandom | LC_ALL=C tr -dc 'a-f0-9' | head -c 6`
+1. Generate 6-char hex ID: `python3 -c "import secrets; print(secrets.token_hex(3))"`
 2. Get working directory: `pwd`
 3. Scaffold: `bash scripts/scaffold-mission.sh <ID> <DIR>`
 4. Confirm: Mission ID (mis_<ID>), mission dir, working dir, state=planning, "Run /mission-plan to begin planning."

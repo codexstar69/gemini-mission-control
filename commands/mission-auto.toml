@@ -6,7 +6,7 @@ If {{args}} is empty → error: "Usage: /mission-auto <description of what to bu
 
 ## Step 1: Scaffold Mission
 
-1. Generate 6-char hex ID: `cat /dev/urandom | LC_ALL=C tr -dc 'a-f0-9' | head -c 6`
+1. Generate 6-char hex ID: `python3 -c "import secrets; print(secrets.token_hex(3))"`
 2. Get working directory: `pwd`
 3. Scaffold: `bash scripts/scaffold-mission.sh <ID> <DIR>`
 4. Confirm scaffold succeeded by reading the created `state.json`
