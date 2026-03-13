@@ -112,7 +112,8 @@ After successful parsing:
 Evaluate the handoff against these options **in order**. Apply the **first** matching option only.
 
 ### Option A — High-severity issues discovered
-**Trigger:** The `discoveredIssues` array contains at least one entry with `severity: "high"`.
+**Trigger:** The `discoveredIssues` array contains at least one entry with `severity: "high"` AND `whatWasLeftUndone` is empty (the worker completed the feature but found high-severity issues during implementation).
+**If high-severity + non-empty `whatWasLeftUndone`:** This means the worker could not complete AND found severe issues. Treat as **Option B** (failure) instead, with the high-severity issues noted in the retry context.
 **Action:**
 1. For each high-severity issue (or group related issues), create a follow-up feature
 2. Insert follow-up feature(s) at the **TOP** of the `features` array (highest priority)
