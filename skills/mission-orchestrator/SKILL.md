@@ -330,14 +330,6 @@ Write messages at these points: worker dispatch (Step 4), feature completion (St
 
 ## Validation Override
 
-When `/mission-override "<justification>"` is invoked by the user:
+When the user invokes `/mission-override`, it marks failed validators as completed, seals the milestone, and logs the override with the user's justification. The full procedure is in `commands/mission-override.toml`.
 
-1. Require a non-empty justification string
-2. Find failed validator features: features whose `id` matches `scrutiny-validator-*` or `user-testing-validator-*` AND whose status is `"pending"` (meaning they haven't passed)
-3. Mark each found validator as `"completed"`, increment `completedFeatures`
-4. Update the synthesis report at `.mission/validation/<milestone>/<type>/synthesis.json` with: `{"overridden":true,"overriddenAt":"<ISO 8601>","justification":"<user text>","originalStatus":"<previous status>"}`
-5. Seal the milestone (override = validators passed). Add to `sealedMilestones`.
-6. Append `{"event":"validation_overridden","justification":"...","features":["..."]}` to progress log
-7. Append `{"type":"validation_result","content":"Milestone <name> overridden: <justification>"}` to messages
-8. **Override does NOT change `validation-state.json`** — failed assertions stay `"failed"`. The override is a procedural bypass documented in the synthesis report.
-9. If the mission was in `"paused"` state → transition to `"orchestrator_turn"`
+**Key rule for the orchestrator to remember:** Override does NOT change `validation-state.json` — failed assertions stay `"failed"`. The override is a procedural bypass, not a claim that validation passed. If the mission was `"paused"`, the override transitions it back to `"orchestrator_turn"`.
