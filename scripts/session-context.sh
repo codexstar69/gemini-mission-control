@@ -4,6 +4,7 @@ set -euo pipefail
 # session-context.sh
 # Checks for active missions in ~/.gemini-mc/missions/ and outputs
 # the most recent active mission context for the SessionStart hook.
+# This ensures mission state is reloaded on Gemini CLI session restart.
 
 MISSIONS_DIR="${HOME}/.gemini-mc/missions"
 
@@ -30,11 +31,23 @@ for mission_dir in "$MISSIONS_DIR"/mis_*/; do
     continue
   fi
 
-  # Get file modification time (seconds since epoch)
-  if [ "$(uname)" = "Darwin" ]; then
-    mtime=$(stat -f '%m' "$state_file" 2>/dev/null) || continue
+  # Get updatedAt timestamp for comparison (prefer state data over mtime)
+  updated_at=$(jq -r '.updatedAt // empty' "$state_file" 2>/dev/null) || true
+
+  # Fall back to file modification time if updatedAt is missing
+  if [ -z "$updated_at" ]; then
+    if [ "$(uname)" = "Darwin" ]; then
+      mtime=$(stat -f '%m' "$state_file" 2>/dev/null) || continue
+    else
+      mtime=$(stat -c '%Y' "$state_file" 2>/dev/null) || continue
+    fi
   else
-    mtime=$(stat -c '%Y' "$state_file" 2>/dev/null) || continue
+    # Convert ISO 8601 to epoch for comparison (use file mtime as proxy)
+    if [ "$(uname)" = "Darwin" ]; then
+      mtime=$(stat -f '%m' "$state_file" 2>/dev/null) || continue
+    else
+      mtime=$(stat -c '%Y' "$state_file" 2>/dev/null) || continue
+    fi
   fi
 
   # Track most recent
@@ -58,8 +71,31 @@ working_dir=$(jq -r '.workingDirectory // "unknown"' "$state_file" 2>/dev/null)
 completed=$(jq -r '.completedFeatures // 0' "$state_file" 2>/dev/null)
 total=$(jq -r '.totalFeatures // 0' "$state_file" 2>/dev/null)
 
-# Output context for the session
-echo "Active mission: ${mission_id} (state: ${state})"
+# Output context for the session — this is read by the model on session start
+echo "=== Active Mission Context (reloaded from disk) ==="
+echo "Mission ID: ${mission_id}"
+echo "State: ${state}"
 echo "Progress: ${completed}/${total} features completed"
 echo "Working directory: ${working_dir}"
-echo "State file: ${state_file}"
+echo "Mission directory: ${latest_dir}"
+
+# Suggest next action based on current state
+case "$state" in
+  planning)
+    echo "Next action: Run /mission-plan to continue planning"
+    ;;
+  orchestrator_turn)
+    echo "Next action: Run /mission-run to continue execution"
+    ;;
+  paused)
+    echo "Next action: Run /mission-resume to resume execution"
+    ;;
+  worker_running|handoff_review)
+    echo "Next action: Run /mission-run to recover from interrupted session"
+    ;;
+  *)
+    echo "Run /mission-status for full details"
+    ;;
+esac
+
+echo "=== End Mission Context ==="

@@ -564,7 +564,28 @@ Use `run_shell_command` to create directories (`mkdir -p`) and `write_file` for 
 
 After all artifacts are generated and the coverage gate passes, transition the mission state.
 
+#### Pre-Transition Coverage Gate Verification (MANDATORY)
+
+**Before writing the state transition, you MUST re-verify the coverage gate.** This is the final checkpoint that prevents an incomplete plan from entering the orchestrator run loop.
+
+Run the coverage gate check one more time:
+
+1. Extract all `VAL-XXX-NNN` assertion IDs from the just-written `validation-contract.md` (use `read_file` and scan for the `VAL-[A-Z]+-[0-9]{3}` pattern).
+2. Extract all assertion IDs from all features' `fulfills` arrays in the just-written `features.json`.
+3. Verify:
+   - **No orphan assertions**: Every VAL ID from the contract appears in at least one feature's `fulfills`.
+   - **No duplicate claims**: No VAL ID appears in more than one feature's `fulfills`.
+   - **No phantom references**: Every VAL ID in a feature's `fulfills` exists in the contract.
+4. If ANY of these checks fail, **STOP**. Do NOT transition to `orchestrator_turn`. Instead:
+   - Report the specific violations to the user (list orphan IDs, duplicate IDs, or phantom IDs).
+   - Fix the violations by updating `features.json` and/or `validation-contract.md`.
+   - Re-run this verification until it passes.
+
+**This gate is non-negotiable. The plan is incomplete until every assertion has exactly one responsible feature, and every feature's fulfills references only valid assertion IDs.**
+
 #### Procedure
+
+Once the coverage gate verification passes:
 
 1. Read the current `state.json` from `~/.gemini-mc/missions/mis_<id>/state.json`.
 2. Count the total number of features in `features.json`.
@@ -574,7 +595,7 @@ After all artifacts are generated and the coverage gate passes, transition the m
    - `"updatedAt": "<current ISO 8601 timestamp>"`
 4. Write the updated `state.json` using `write_file`.
 
-#### Verification
+#### Post-Transition Verification
 
 After writing, read back `state.json` and confirm:
 - `state` is `"orchestrator_turn"`
@@ -583,7 +604,7 @@ After writing, read back `state.json` and confirm:
 
 Log the state transition to `progress_log.jsonl`:
 ```json
-{"timestamp": "2025-01-15T10:30:00Z", "event": "state_transition", "from": "planning", "to": "orchestrator_turn", "totalFeatures": 12}
+{"timestamp": "2025-01-15T10:30:00Z", "event": "state_transition", "from": "planning", "to": "orchestrator_turn", "totalFeatures": 12, "coverageGatePassed": true}
 ```
 
-**The planning phase is now complete.** Inform the user that the plan has been applied and the mission is ready for `/mission-run`.
+**The planning phase is now complete.** Inform the user that the plan has been applied, the coverage gate has passed, and the mission is ready for `/mission-run`.

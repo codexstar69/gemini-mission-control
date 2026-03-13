@@ -210,7 +210,7 @@ paused ────────────────→ orchestrator_turn    
 
 ### 7.3 Transition Rules
 
-1. **planning → orchestrator_turn**: Triggered when the planner skill completes Phase 7 (Generate Artifacts). Requires: `features.json` written with all features, `validation-contract.md` generated, coverage gate passed (every VAL assertion claimed by exactly one feature), `totalFeatures` counter set in `state.json`.
+1. **planning → orchestrator_turn**: Triggered when the planner skill completes Phase 7 (Generate Artifacts). Requires: `features.json` written with all features, `validation-contract.md` generated, **coverage gate verification passed** (every VAL assertion ID in the contract claimed by exactly one feature's `fulfills` array — no orphans, no duplicates, no phantom references), `validation-state.json` initialized with all assertion IDs, and `totalFeatures` counter set in `state.json`. **This transition is blocked if the coverage gate fails.**
 
 2. **orchestrator_turn → worker_running**: Triggered when the orchestrator dispatches a worker subagent. The orchestrator selects the next feature whose preconditions are all met and status is `pending`, constructs an enriched prompt, and calls the worker agent.
 
@@ -239,3 +239,52 @@ Within the orchestrator run loop, milestones follow this lifecycle:
 3. **Validation Execution**: Validator subagents are dispatched in order (scrutiny first, then user-testing).
 4. **Sealing**: When both validators pass, the milestone is added to `sealedMilestones`. No new features may be added to a sealed milestone.
 5. **Override**: If validation fails, `/mission-override` can be used with justification to force-complete validator features.
+
+## 8. Cross-Session Persistence
+
+All mission state is persisted on disk in `~/.gemini-mc/missions/`. This means missions survive Gemini CLI session restarts — closing and reopening `gemini` does not lose progress.
+
+### 8.1 How State Persists
+
+Every state change (state transitions, feature completions, validation results) is immediately written to JSON files on disk using `write_file`. There is no in-memory-only state. The following files are always up-to-date on disk:
+
+- `state.json` — Current state machine state, counters, sealed milestones
+- `features.json` — Feature list with statuses (pending/completed/cancelled)
+- `validation-state.json` — Assertion pass/fail tracking
+- `progress_log.jsonl` — Append-only event log for crash recovery
+- `messages.jsonl` — Append-only inter-agent message log
+- `handoffs/<feature-id>.json` — Individual worker handoff reports
+
+### 8.2 Session Startup Hook
+
+The `hooks/hooks.json` configuration registers a `SessionStart` hook that runs `scripts/session-context.sh` at the beginning of every Gemini CLI session. This script:
+
+1. Scans `~/.gemini-mc/missions/` for all mission directories
+2. Finds the most recently updated active mission (not `completed` or `failed`)
+3. Outputs the active mission's ID, state, progress, and working directory
+
+This context is automatically loaded into the session, so commands like `/mission-status`, `/mission-resume`, and `/mission-run` can immediately operate on the correct mission without requiring the user to specify a mission ID.
+
+### 8.3 Cross-Session Command Behavior
+
+After a session restart, all commands correctly read the persisted state from disk:
+
+| Scenario | Command | Behavior |
+|----------|---------|----------|
+| Mission was in `planning` state | `/mission-plan` | Resumes interactive planning from where the user left off |
+| Mission was in `orchestrator_turn` | `/mission-run` | Re-enters the orchestrator run loop and continues dispatching |
+| Mission was in `paused` state | `/mission-resume` | Transitions back to `orchestrator_turn` and resumes |
+| Mission was in `worker_running` | `/mission-run` | Orchestrator performs crash recovery (resets stuck features to `pending`) |
+| Mission was `completed` | `/mission-status` | Displays the completed mission state |
+
+### 8.4 Crash Recovery on Restart
+
+If a Gemini session was terminated while a worker was running (`state: "worker_running"`), the orchestrator skill's Step 1 (Read State & Crash Recovery) handles recovery:
+
+1. Detects the `worker_running` state
+2. Identifies stuck features from `progress_log.jsonl`
+3. Resets stuck features to `pending` status
+4. Transitions state back to `orchestrator_turn`
+5. Logs the recovery event
+
+This ensures no work is permanently lost due to session interruption.
