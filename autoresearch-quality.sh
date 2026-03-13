@@ -309,7 +309,18 @@ check_present "$PLAN" "typecheck" "Planner defines typecheck command"
 check_present "$PLAN" "lint" "Planner defines lint command"
 
 echo ""
-echo "=== 30. VALIDATE STATE SCRIPT ==="
+echo "=== 30. CROSS-FILE: State machine consistency ==="
+# Verify all states mentioned in GEMINI.md are handled in orchestrator
+for state in "orchestrator_turn" "worker_running" "handoff_review" "paused" "completed" "failed"; do
+  check_present "GEMINI.md" "$state" "GEMINI.md mentions state: $state"
+done
+# Verify orchestrator handles all Decision Tree options mentioned in GEMINI.md
+for opt in "Option A" "Option B" "Option C" "Option D" "Clean"; do
+  check_present "GEMINI.md" "$opt" "GEMINI.md mentions decision: $opt"
+done
+
+echo ""
+echo "=== 31. VALIDATE STATE SCRIPT ==="
 if bash scripts/validate-state.sh 076af0 2>&1 | rg -q "VALID"; then
   pass "validate-state.sh passes on test mission"
 else
