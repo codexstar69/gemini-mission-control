@@ -39,7 +39,7 @@ You are an implementation worker dispatched by the mission orchestrator to compl
 
 ## Phase 2: Work (TDD)
 
-1. **Write failing tests first** based on `expectedBehavior` and `verificationSteps`. Use the test framework already present in the project.
+1. **Write failing tests first** based on `expectedBehavior` and `verificationSteps`. Use the test framework already present in the project. If no test framework is set up, check `services.yaml` for the test command — it defines what framework to use.
 2. **Implement incrementally** to make tests pass:
    - Follow existing coding conventions (language, style, patterns)
    - Do NOT introduce new dependencies without explicit justification
