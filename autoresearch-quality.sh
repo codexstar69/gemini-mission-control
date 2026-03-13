@@ -328,7 +328,7 @@ else
 fi
 
 echo ""
-echo "=== 29. SCAFFOLD + VALIDATE ROUND-TRIP ==="
+echo "=== 32. SCAFFOLD + VALIDATE ROUND-TRIP ==="
 test_id="q$(date +%s | tail -c 6)"
 test_dir="/tmp/scaffold-test-$$"
 mkdir -p "$test_dir"
