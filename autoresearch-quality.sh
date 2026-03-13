@@ -217,7 +217,53 @@ for script in scripts/scaffold-mission.sh scripts/session-context.sh scripts/val
 done
 
 echo ""
-echo "=== 24. VALIDATE STATE SCRIPT ==="
+echo "=== 24. AGENTS: Tool names are valid Gemini CLI tools ==="
+VALID_TOOLS="read_file|write_file|replace|run_shell_command|grep_search|list_directory|google_web_search|web_fetch|glob|read_many_files"
+for agent in agents/*.md; do
+  name=$(basename "$agent" .md)
+  # Extract tool names from frontmatter (between first --- and second ---)
+  in_frontmatter=0
+  in_tools=0
+  while IFS= read -r line; do
+    if [[ "$line" == "---" ]]; then
+      if [ $in_frontmatter -eq 0 ]; then
+        in_frontmatter=1; continue
+      else
+        break
+      fi
+    fi
+    if [[ "$line" =~ ^tools: ]]; then
+      in_tools=1
+      # Handle inline array: tools: [read_file, write_file, ...]
+      if [[ "$line" =~ \[ ]]; then
+        # Extract tools from inline array
+        tools_str="${line#*[}"
+        tools_str="${tools_str%%]*}"
+        for tool in $(echo "$tools_str" | tr ',' '\n' | tr -d ' '); do
+          if ! echo "$tool" | rg -q "^($VALID_TOOLS)$" 2>/dev/null; then
+            fail "Invalid tool '$tool' in $name"
+          fi
+        done
+        in_tools=0
+      fi
+      continue
+    fi
+    if [ $in_tools -eq 1 ]; then
+      if [[ "$line" =~ ^[[:space:]]*-[[:space:]]+(.*) ]]; then
+        tool="${BASH_REMATCH[1]}"
+        if ! echo "$tool" | rg -q "^($VALID_TOOLS)$" 2>/dev/null; then
+          fail "Invalid tool '$tool' in $name"
+        fi
+      elif [[ ! "$line" =~ ^[[:space:]] ]]; then
+        in_tools=0
+      fi
+    fi
+  done < "$agent"
+  pass "All tools valid in $name"
+done
+
+echo ""
+echo "=== 25. VALIDATE STATE SCRIPT ==="
 if bash scripts/validate-state.sh 076af0 2>&1 | rg -q "VALID"; then
   pass "validate-state.sh passes on test mission"
 else
