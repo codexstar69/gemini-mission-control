@@ -1,26 +1,26 @@
 # Autoresearch Ideas Backlog
 
-## Completed
-- ✅ Scenario trace tests (happy path, retry, crash recovery)
-- ✅ Cross-reference validation (scaffold→validate round-trip)
-- ✅ Agent tool name validation
-- ✅ Worker pre-handoff checklist
-- ✅ Option A edge case (high-severity + incomplete → Option B)
-- ✅ Handoff context from preconditions in worker prompts
-- ✅ Validator feature fields fully specified
-- ✅ Service cleanup guardrail
+## Completed ✅
+- Scenario trace tests (happy path, retry, crash recovery) — quality suite §25-27
+- Cross-reference validation (scaffold→validate round-trip) — quality suite §32
+- Agent tool name validation — quality suite §24
+- Worker pre-handoff checklist — agents/mission-worker.md
+- Option A edge case (high-severity + incomplete → Option B) — orchestrator Step 6
+- Handoff context from preconditions in worker prompts — orchestrator Step 3
+- Validator feature fields fully specified — orchestrator Step 8.2
+- Service cleanup guardrail — agents/user-testing-validator.md
+- Severity format standardization (blocking/non_blocking → high/medium/low) — ALL agents
+- Step 8.3 sealing criterion fix — orchestrator Step 8.3
+- Worker timeout handling — orchestrator Step 4
+- Single-session constraint — orchestrator "When to Activate"
+- Message bus context in worker prompts — orchestrator Step 3
+- Handoff parsing clarification (last JSON block) — orchestrator Step 5
+- Cross-file services.yaml format validation — quality suite §29
+- State machine cross-validation — quality suite §30
+- Validation override deduplication — orchestrator references command instead of duplicating
 
-## Quality Improvements (Remaining)
-- **End-to-end simulation test**: Create a mock mission with 2 milestones and trace through the entire orchestrator flow verifying state changes at each step
-- **Validator handoff parsing**: The scrutiny and user-testing validators produce different handoff formats (blocking/non_blocking vs high/medium/low severity). Verify the orchestrator handles both correctly.
-- **Message bus consumption**: Workers are told to read `messages.jsonl` but the orchestrator doesn't explicitly include recent messages in the worker prompt. Consider adding this.
-
-## Byte Reduction (Quality-Preserving)
-- **Deduplicate log event format**: The `{"timestamp":"...","event":"..."}` pattern appears 9 times in orchestrator. Could define once and reference. Saves ~200 bytes.
-- **Combine Pause/Resume with Budget**: These share logic. Could merge sections. Saves ~100 bytes.
-- **Command TOML "find mission" pattern**: 7 commands repeat the same "find mission" logic. Could reference a shared pattern. But TOML commands are independently loaded, so this may not be possible.
-
-## Stability Improvements
-- **Worker timeout handling**: What happens when a worker hits timeout_mins? The orchestrator should have explicit instructions for handling subagent timeouts.
-- **Concurrent access protection**: If two sessions try to run the same mission simultaneously, state corruption is possible. Document single-session constraint.
-- **Progress log rotation**: Over very long missions, progress_log.jsonl could grow large. Consider adding rotation or trimming guidance.
+## Remaining Ideas (Lower Priority)
+- **End-to-end simulation test**: Mock mission with 2 milestones, trace full orchestrator flow
+- **Progress log rotation**: Guidance for very long missions where progress_log.jsonl grows large
+- **Feature description templates**: Standard description formats for common feature types
+- **Orchestrator self-monitoring**: Track dispatch cycle time and warn if budget is being consumed too quickly
