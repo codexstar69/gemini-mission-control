@@ -345,6 +345,14 @@ fi
 rm -rf "$test_dir"
 
 echo ""
+echo "=== 33. GEMINI.md: Common Pitfalls section exists ==="
+check_present "GEMINI.md" "Common Pitfalls" "Common Pitfalls section"
+check_present "GEMINI.md" "pipe.*exit code|exit code.*pipe" "Pipe warning in pitfalls"
+check_present "GEMINI.md" "high/medium/low" "Severity format in pitfalls"
+check_present "GEMINI.md" "sealed.*immutable|immutable.*sealed" "Sealed milestone warning in pitfalls"
+check_present "GEMINI.md" "[Cc]ancelled.*satisfy|cancelled.*precondition" "Cancelled preconditions in pitfalls"
+
+echo ""
 echo "=== SUMMARY ==="
 echo "Errors: $ERRORS"
 echo "Warnings: $WARNINGS"
