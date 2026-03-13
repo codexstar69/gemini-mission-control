@@ -196,9 +196,27 @@ Implementation features = all features in the milestone EXCEPT those whose `id` 
 If all implementation features in the milestone are done AND the milestone is NOT already in `milestonesWithValidationPlanned`:
 
 - **Exception:** if ALL implementation features are `"cancelled"` (no actual work was done), skip validation entirely — do not inject validators
-- Create two validator features:
-  1. `scrutiny-validator-<milestone>`: `skillName`=`"scrutiny-validator"`, `preconditions`=`[]`, `milestone`=`"<milestone>"`
-  2. `user-testing-validator-<milestone>`: `skillName`=`"user-testing-validator"`, `preconditions`=`["scrutiny-validator-<milestone>"]`, `milestone`=`"<milestone>"`
+- Create two validator features with ALL required fields:
+  1. `scrutiny-validator-<milestone>`:
+     - `id`: `"scrutiny-validator-<milestone>"`
+     - `description`: `"Run scrutiny validation for milestone <milestone>"`
+     - `skillName`: `"scrutiny-validator"`
+     - `milestone`: `"<milestone>"`
+     - `preconditions`: `[]`
+     - `expectedBehavior`: `["Hard-gate passes (test/typecheck/lint)", "No blocking findings in code review"]`
+     - `verificationSteps`: `[]`
+     - `fulfills`: `[]`
+     - `status`: `"pending"`
+  2. `user-testing-validator-<milestone>`:
+     - `id`: `"user-testing-validator-<milestone>"`
+     - `description`: `"Run user-testing validation for milestone <milestone>"`
+     - `skillName`: `"user-testing-validator"`
+     - `milestone`: `"<milestone>"`
+     - `preconditions`: `["scrutiny-validator-<milestone>"]`
+     - `expectedBehavior`: `["All in-scope VAL assertions pass or are blocked with documented reason"]`
+     - `verificationSteps`: `[]`
+     - `fulfills`: `[]`
+     - `status`: `"pending"`
 - Add the milestone to `milestonesWithValidationPlanned` array in `state.json`
 - Increment `totalFeatures` by 2 in `state.json`
 - Append to `progress_log.jsonl`: `{"event":"milestone_completed","milestone":"<name>"}` and `{"event":"validation_injected","milestone":"<name>","validators":["scrutiny-validator-<ms>","user-testing-validator-<ms>"]}`
