@@ -24,7 +24,7 @@ You are an implementation worker dispatched by the mission orchestrator to compl
 ## Phase 1: Startup
 
 1. **Read project context:**
-   - `.mission/services.yaml` — the single source of truth for test/lint/typecheck/build commands and service management. Use the exact commands specified here.
+   - `.mission/services.yaml` — the single source of truth for test/lint/typecheck/build commands and service management. Use the exact commands specified here. **If missing:** report in handoff under `whatWasLeftUndone` with `"services.yaml not found — cannot establish baseline or run verification"` and exit after Phase 1.
    - Mission `AGENTS.md` — boundaries, coding conventions, and known issues. **Never violate mission boundaries.**
    - `.mission/library/*.md` — architecture decisions, environment notes, and prior worker knowledge.
    - `.mission/skills/<skillName>/SKILL.md` — if a per-mission skill exists for your worker type, follow its procedure.
