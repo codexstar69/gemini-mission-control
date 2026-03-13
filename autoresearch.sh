@@ -1,75 +1,87 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Benchmark all 3 shell scripts. Primary metric: total wall-clock µs.
-# Runs each script 5 times and reports the median.
+# Benchmark: instruction token footprint
+# Measures total bytes of all instruction files that the LLM loads during operation.
+#
+# Files measured:
+#   ALWAYS LOADED (every session):
+#     - GEMINI.md (extension context, loaded on every session start)
+#
+#   LOADED ON /mission-run (orchestrator loop — the hot path):
+#     - skills/mission-orchestrator/SKILL.md
+#
+#   LOADED ON /mission-plan:
+#     - skills/mission-planner/SKILL.md
+#
+#   LOADED ON /mission-plan (Phase 7, worker design):
+#     - skills/define-worker-skills/SKILL.md
+#
+#   LOADED PER WORKER DISPATCH (worker gets agent body as system prompt):
+#     - agents/mission-worker.md
+#     - agents/code-quality-worker.md
+#     - agents/scrutiny-validator.md
+#     - agents/user-testing-validator.md
+#
+#   LOADED PER COMMAND INVOCATION:
+#     - commands/*.toml (each one is small, but they add up)
+#
+# Primary metric: total_bytes of ALL instruction files
+# Secondary metrics: per-file and per-category breakdowns
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR"
 
-# Ensure a test mission exists for scaffold (clean each run)
-rm -rf "$HOME/.gemini-mc/missions/mis_bench_tmp"
-
-time_us() {
-  # Run command, return wall-clock microseconds (via gdate or python fallback)
-  local cmd="$*"
-  local start end
-  if command -v gdate &>/dev/null; then
-    start=$(gdate +%s%N)
-    eval "$cmd" >/dev/null 2>&1
-    end=$(gdate +%s%N)
-    echo $(( (end - start) / 1000 ))
-  else
-    python3 -c "
-import subprocess, time
-s=time.perf_counter()
-subprocess.run('$cmd', shell=True, capture_output=True)
-e=time.perf_counter()
-print(int((e-s)*1_000_000))
-"
-  fi
+file_bytes() {
+  wc -c < "$1" 2>/dev/null | tr -d ' '
 }
 
-median() {
-  # Read numbers from stdin, print median
-  sort -n | awk '{a[NR]=$1} END{print a[int((NR+1)/2)]}'
-}
+# === ALWAYS LOADED ===
+gemini_md=$(file_bytes "GEMINI.md")
 
-RUNS=5
+# === ORCHESTRATOR (hot path — every loop iteration) ===
+orchestrator=$(file_bytes "skills/mission-orchestrator/SKILL.md")
 
-# --- scaffold-mission.sh ---
-scaffold_times=()
-for i in $(seq 1 $RUNS); do
-  rm -rf "$HOME/.gemini-mc/missions/mis_bench_tmp"
-  t=$(time_us "bash scripts/scaffold-mission.sh bench_tmp /tmp/bench")
-  scaffold_times+=("$t")
+# === PLANNER ===
+planner=$(file_bytes "skills/mission-planner/SKILL.md")
+
+# === WORKER SKILLS DESIGNER ===
+worker_skills=$(file_bytes "skills/define-worker-skills/SKILL.md")
+
+# === AGENTS (loaded per worker dispatch) ===
+agent_worker=$(file_bytes "agents/mission-worker.md")
+agent_quality=$(file_bytes "agents/code-quality-worker.md")
+agent_scrutiny=$(file_bytes "agents/scrutiny-validator.md")
+agent_usertesting=$(file_bytes "agents/user-testing-validator.md")
+agents_total=$((agent_worker + agent_quality + agent_scrutiny + agent_usertesting))
+
+# === COMMANDS ===
+commands_total=0
+for f in commands/*.toml; do
+  [ -f "$f" ] && commands_total=$((commands_total + $(file_bytes "$f")))
 done
-scaffold_median=$(printf '%s\n' "${scaffold_times[@]}" | median)
 
-# --- validate-state.sh ---
-validate_times=()
-for i in $(seq 1 $RUNS); do
-  t=$(time_us "bash scripts/validate-state.sh 076af0")
-  validate_times+=("$t")
+# === SCRIPTS (not LLM-loaded, but part of extension) ===
+scripts_total=0
+for f in scripts/*.sh; do
+  [ -f "$f" ] && scripts_total=$((scripts_total + $(file_bytes "$f")))
 done
-validate_median=$(printf '%s\n' "${validate_times[@]}" | median)
 
-# --- session-context.sh ---
-session_times=()
-for i in $(seq 1 $RUNS); do
-  t=$(time_us "bash scripts/session-context.sh")
-  session_times+=("$t")
-done
-session_median=$(printf '%s\n' "${session_times[@]}" | median)
+# === TOTALS ===
+# "hot_path_bytes" = what the LLM processes every orchestrator loop iteration
+# This is: GEMINI.md + mission-orchestrator SKILL.md
+hot_path=$((gemini_md + orchestrator))
 
-# Total
-total=$((scaffold_median + validate_median + session_median))
-
-# Cleanup
-rm -rf "$HOME/.gemini-mc/missions/mis_bench_tmp"
+# "full_bytes" = every instruction file in the extension
+total=$((gemini_md + orchestrator + planner + worker_skills + agents_total + commands_total))
 
 echo "=== RESULTS ==="
-echo "scaffold_µs: ${scaffold_median}"
-echo "validate_µs: ${validate_median}"
-echo "session_µs: ${session_median}"
-echo "total_µs: ${total}"
+echo "total_bytes: ${total}"
+echo "hot_path_bytes: ${hot_path}"
+echo "gemini_md_bytes: ${gemini_md}"
+echo "orchestrator_bytes: ${orchestrator}"
+echo "planner_bytes: ${planner}"
+echo "worker_skills_bytes: ${worker_skills}"
+echo "agents_bytes: ${agents_total}"
+echo "commands_bytes: ${commands_total}"
+echo "scripts_bytes: ${scripts_total}"

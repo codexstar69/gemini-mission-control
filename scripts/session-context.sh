@@ -9,17 +9,11 @@ MISSIONS_DIR="${HOME}/.gemini-mc/missions"
 
 [ -d "$MISSIONS_DIR" ] || exit 0
 
-# Collect all state.json paths
-state_files=()
-for f in "$MISSIONS_DIR"/mis_*/state.json; do
-  [ -f "$f" ] && state_files+=("$f")
-done
-[ ${#state_files[@]} -eq 0 ] && exit 0
+# Use ls -t to get state files sorted by mtime (newest first) — one process instead of stat+sort
+sorted=$(cd "$MISSIONS_DIR" && ls -t mis_*/state.json 2>/dev/null) || exit 0
+[ -n "$sorted" ] || exit 0
 
-# Get mtimes sorted newest-first in ONE stat call
-sorted=$(stat -f '%m %N' "${state_files[@]}" 2>/dev/null | sort -rn)
-
-# Pure-bash JSON extractor: read line-by-line (state.json is pretty-printed, one key per line)
+# Pure-bash JSON extractor for pretty-printed state.json
 parse_state_json() {
   local file="$1"
   j_state="" j_missionId="" j_workingDirectory="" j_completedFeatures="" j_totalFeatures=""
@@ -34,8 +28,9 @@ parse_state_json() {
   done < "$file"
 }
 
-# Walk newest-first, find first active mission
-while IFS=' ' read -r mtime path; do
+# Walk newest-first
+while IFS= read -r relpath; do
+  path="${MISSIONS_DIR}/${relpath}"
   [ -f "$path" ] || continue
 
   parse_state_json "$path"
