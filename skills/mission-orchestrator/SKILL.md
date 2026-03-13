@@ -116,12 +116,24 @@ After successful parsing:
 
 ## Step 6: Decision Tree
 
-Evaluate the handoff against these options **in order**. Apply the **first** matching option only.
+Classify the handoff by following this sequential flow. Stop at the first match.
 
-### Option A — High-severity issues discovered
-**Trigger:** The `discoveredIssues` array contains at least one entry with `severity: "high"` AND `whatWasLeftUndone` is empty (the worker completed the feature but found high-severity issues during implementation).
-**If high-severity + non-empty `whatWasLeftUndone`:** This means the worker could not complete AND found severe issues. Treat as **Option B** (failure) instead, with the high-severity issues noted in the retry context.
-**Action:**
+**Step 6.1 — Malformed handoff?**
+If the handoff JSON is missing, unparseable, or missing required fields → **Option B** (failure).
+
+**Step 6.2 — Incomplete work?** (`whatWasLeftUndone` is non-empty)
+- Has `discoveredIssues` with `severity: "high"`? → **Option B** (failure, with high-severity issues noted in retry context)
+- ALL `verification.commandsRun` entries have non-zero `exitCode`? → **Option B** (failure)
+- At least some `exitCode: 0`? → **Option C** (partial completion)
+
+**Step 6.3 — Complete work** (`whatWasLeftUndone` is empty, all `exitCode` = 0)
+- Has `discoveredIssues` with `severity: "high"`? → **Option A** (create follow-up features)
+- Has only `"medium"` or `"low"` severity issues? → **Option D** (mark complete, create misc features)
+- `discoveredIssues` is empty? → **Clean Success**
+
+---
+
+### Option A — High-severity issues found (feature completed)
 1. For each high-severity issue (or group related issues), create a follow-up feature
 2. Insert follow-up feature(s) at the **TOP** of the `features` array (highest priority)
 3. **Sealed milestone check:** if the original feature's milestone is in `sealedMilestones`, assign the follow-up to a `misc-*` milestone instead. Never add to a sealed milestone.
@@ -140,8 +152,6 @@ Evaluate the handoff against these options **in order**. Apply the **first** mat
 7. Update `totalFeatures` in `state.json` to reflect newly added feature(s)
 
 ### Option B — Worker failure
-**Trigger:** Non-empty `whatWasLeftUndone` AND `verification.commandsRun` contains entries with non-zero `exitCode`, OR the handoff was malformed/missing.
-**Action:**
 1. Keep the feature's status as `"pending"` (do NOT mark completed)
 2. Update the feature's `description`: prepend `[RETRY] Previous attempt failed: <whatWasLeftUndone>. Error: <relevant verification output>.` to the existing description
 3. Append to `progress_log.jsonl`: `{"timestamp":"...","event":"feature_retry","featureId":"<id>","reason":"<brief reason>"}`
@@ -152,8 +162,6 @@ Evaluate the handoff against these options **in order**. Apply the **first** mat
    - Exit the loop
 
 ### Option C — Partial completion
-**Trigger:** Non-empty `whatWasLeftUndone` AND `verification.commandsRun` has at least some entries with `exitCode: 0` (partial success), AND no high-severity issues in `discoveredIssues`.
-**Action:**
 1. Update the feature's `description`: `[PARTIAL] Completed: <whatWasImplemented>. Remaining: <whatWasLeftUndone>.`
 2. Keep the feature's status as `"pending"` for re-dispatch
 3. Append to `progress_log.jsonl`: `{"timestamp":"...","event":"feature_partial","featureId":"<id>","implemented":"<whatWasImplemented>","remaining":"<whatWasLeftUndone>"}`
@@ -161,8 +169,6 @@ Evaluate the handoff against these options **in order**. Apply the **first** mat
    - The feature is making progress but never finishing. Treat as **Option B failure** with `whatWasLeftUndone` as the reason. This triggers Option B's retry counter and eventual escalation to the user.
 
 ### Option D — Medium/low-severity issues only
-**Trigger:** `discoveredIssues` contains ONLY `"medium"` or `"low"` severity entries (no `"high"`), AND `whatWasLeftUndone` is empty, AND all `exitCode` values are 0.
-**Action:**
 1. Mark the original feature as `"completed"`, increment `completedFeatures`
 2. For each medium/low issue, create a feature in a `misc-*` milestone:
    - Find the current misc milestone by scanning `features.json` for features with `milestone` starting with `misc-`. If none exist, create `misc-1`.
@@ -171,8 +177,6 @@ Evaluate the handoff against these options **in order**. Apply the **first** mat
 3. Update `totalFeatures` to reflect new features
 
 ### Clean Success — No issues at all
-**Trigger:** `discoveredIssues` is empty, `whatWasLeftUndone` is empty, ALL `exitCode` values are 0.
-**Action:**
 1. Mark the feature as `"completed"` in `features.json`
 2. Increment `completedFeatures` in `state.json`
 3. No new features created

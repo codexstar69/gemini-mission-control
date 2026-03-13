@@ -192,7 +192,7 @@ done
 
 echo ""
 echo "=== 21. ORCHESTRATOR: Option A + incomplete clarification ==="
-check_present "$ORCH" "high-severity.*incomplete|high.*non-empty.*whatWasLeftUndone|high-severity.*Option B" "Option A + incomplete → Option B fallback"
+check_present "$ORCH" "high.*Option B|high.*non-empty.*whatWasLeftUndone|high-severity.*Option B" "Option A + incomplete → Option B fallback"
 
 echo ""
 echo "=== 22. HOOKS: SessionStart hook exists ==="
