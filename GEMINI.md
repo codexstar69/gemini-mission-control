@@ -41,12 +41,25 @@ All agents: `kind: local`, tools restricted to valid Gemini CLI tools (`read_fil
 
 ## State Machine
 
-States: `planning` → `orchestrator_turn` ⇄ `worker_running` → `handoff_review` → `orchestrator_turn` → `completed`. Also: `paused` (from `orchestrator_turn`), `failed` (from any).
+```
+planning ──────→ orchestrator_turn ←──────→ paused
+                   ↓           ↑
+              worker_running    │
+                   ↓           │
+              handoff_review ──┘
+                                ──────→ completed
+                 (any state) ──────→ failed
+```
 
-**Key rules:**
-- `planning → orchestrator_turn`: Requires coverage gate pass (every VAL-XXX-NNN claimed by exactly one feature's `fulfills`).
+**Key transitions:**
+- `planning → orchestrator_turn`: Coverage gate must pass (every VAL-XXX-NNN claimed by exactly one feature's `fulfills`).
 - `orchestrator_turn → worker_running`: Dispatch worker for first ready feature (pending + all preconditions completed or cancelled).
-- `handoff_review → orchestrator_turn`: Decision tree — Option A (high-severity → follow-up), Option B (failure → retry, max 3), Option C (partial → update desc), Option D (med/low → misc milestone).
+- `handoff_review → orchestrator_turn`: Decision tree classifies handoff:
+  - **Option A** — high-severity issues found (worker completed) → create follow-up features
+  - **Option B** — worker failure → retry (max 3 attempts, then pause for user help)
+  - **Option C** — partial completion → update description, re-dispatch
+  - **Option D** — medium/low issues → mark complete, create misc features
+  - **Clean** — no issues → mark complete
 - `orchestrator_turn → completed`: All features completed/cancelled + all milestones sealed.
 
 ## Mission Directory
