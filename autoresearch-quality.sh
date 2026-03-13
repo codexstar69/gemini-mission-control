@@ -263,7 +263,30 @@ for agent in agents/*.md; do
 done
 
 echo ""
-echo "=== 25. VALIDATE STATE SCRIPT ==="
+echo "=== 25. SCENARIO: Happy path concepts present ==="
+# A clean success flow needs: DAG eval → dispatch → handoff parse → Clean Success → milestone check → validator injection → seal
+check_present "$ORCH" "first.*ready|first ready" "Happy path: select first ready feature"
+check_present "$ORCH" "worker_running" "Happy path: transition to worker_running"
+check_present "$ORCH" "handoff_review" "Happy path: transition to handoff_review"
+check_present "$ORCH" "Clean Success" "Happy path: clean success path"
+check_present "$ORCH" "scrutiny-validator-" "Happy path: scrutiny validator injection"
+check_present "$ORCH" "user-testing-validator-" "Happy path: user-testing validator injection"
+check_present "$ORCH" "sealedMilestones" "Happy path: milestone sealing"
+
+echo ""
+echo "=== 26. SCENARIO: Retry escalation concepts present ==="
+check_present "$ORCH" "RETRY" "Retry: RETRY prefix"
+check_present "$ORCH" "feature_retry" "Retry: retry log event"
+check_present "$ORCH" "feature_escalation" "Retry: escalation log event"
+check_present "$ORCH" "Manual intervention|manual intervention|user help" "Retry: user intervention request"
+
+echo ""
+echo "=== 27. SCENARIO: Crash recovery concepts present ==="
+check_present "$ORCH" "crash_recovery" "Crash: recovery log event"
+check_present "$ORCH" "worker_started.*worker_completed|worker_completed.*worker_started" "Crash: detect stuck by matching start/complete events"
+
+echo ""
+echo "=== 28. VALIDATE STATE SCRIPT ==="
 if bash scripts/validate-state.sh 076af0 2>&1 | rg -q "VALID"; then
   pass "validate-state.sh passes on test mission"
 else
