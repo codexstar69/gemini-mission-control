@@ -17,24 +17,31 @@ NOW="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 # Create mission directory and handoffs subdirectory
 mkdir -p "${MISSION_DIR}/handoffs"
 
-# state.json — initial mission state (use python3 for safe JSON escaping)
-python3 -c "
-import json, sys
-state = {
-    'missionId': 'mis_' + sys.argv[1],
-    'state': 'planning',
-    'workingDirectory': sys.argv[2],
-    'completedFeatures': 0,
-    'totalFeatures': 0,
-    'createdAt': sys.argv[3],
-    'updatedAt': sys.argv[3],
-    'sealedMilestones': [],
-    'milestonesWithValidationPlanned': []
+# Escape JSON strings (handle backslash and double-quote)
+json_escape() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  printf '%s' "$s"
 }
-with open(sys.argv[4], 'w') as f:
-    json.dump(state, f, indent=2)
-    f.write('\n')
-" "${MISSION_ID}" "${WORKING_DIR}" "${NOW}" "${MISSION_DIR}/state.json"
+
+MID_ESC=$(json_escape "mis_${MISSION_ID}")
+WD_ESC=$(json_escape "$WORKING_DIR")
+
+# state.json — initial mission state (pure bash, no python3)
+cat > "${MISSION_DIR}/state.json" <<EOF
+{
+  "missionId": "${MID_ESC}",
+  "state": "planning",
+  "workingDirectory": "${WD_ESC}",
+  "completedFeatures": 0,
+  "totalFeatures": 0,
+  "createdAt": "${NOW}",
+  "updatedAt": "${NOW}",
+  "sealedMilestones": [],
+  "milestonesWithValidationPlanned": []
+}
+EOF
 
 # features.json — empty features array
 cat > "${MISSION_DIR}/features.json" <<EOF

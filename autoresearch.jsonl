@@ -1,2 +1,3 @@
 {"type":"config","name":"Gemini Mission Control shell script performance","metricName":"total_µs","metricUnit":"µs","bestDirection":"lower"}
 {"run":1,"commit":"b9d8aa5","metric":319144,"metrics":{"scaffold_µs":60044,"validate_µs":23649,"session_µs":235451},"status":"keep","description":"Baseline: scaffold=60ms, validate=24ms, session=235ms","timestamp":1773366533806,"segment":0}
+{"run":2,"commit":"c751465","metric":89850,"metrics":{"scaffold_µs":48003,"session_µs":24277,"validate_µs":17570},"status":"keep","description":"session-context.sh: single stat + sorted walk + 1 jq per candidate (was N×jq per dir)","timestamp":1773366608260,"segment":0}
