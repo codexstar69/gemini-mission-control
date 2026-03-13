@@ -70,40 +70,15 @@ You are an implementation worker dispatched by the mission orchestrator to compl
   "whatWasImplemented": "Concrete description referencing specific files and functions. Minimum 50 characters.",
   "whatWasLeftUndone": "Empty string if complete. Otherwise describe what remains and why.",
   "verification": {
-    "commandsRun": [
-      {
-        "command": "exact command that was run",
-        "exitCode": 0,
-        "observation": "Specific result — not just 'tests passed' but '42 tests passed in 3.2s'"
-      }
-    ],
-    "interactiveChecks": [
-      {
-        "action": "What you did",
-        "observed": "What happened"
-      }
-    ]
+    "commandsRun": [{"command": "exact command", "exitCode": 0, "observation": "Specific result — '42 tests passed in 3.2s' not just 'passed'"}],
+    "interactiveChecks": [{"action": "What you did", "observed": "What happened"}]
   },
   "tests": {
-    "added": [
-      {
-        "file": "path/to/test/file",
-        "cases": [
-          {
-            "name": "test case name",
-            "verifies": "what behavior this test covers"
-          }
-        ]
-      }
-    ],
+    "added": [{"file": "path/to/test", "cases": [{"name": "test name", "verifies": "behavior covered"}]}],
     "coverage": "Summary of what tests cover"
   },
   "discoveredIssues": [
-    {
-      "severity": "high",
-      "description": "Issue description",
-      "suggestedFix": "How to fix it"
-    }
+    {"severity": "high|medium|low", "description": "Issue description", "suggestedFix": "How to fix it"}
   ]
 }
 ```
