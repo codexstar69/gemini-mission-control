@@ -375,7 +375,25 @@ done
 $all_ordered && pass "Steps 1-8 appear in correct order"
 
 echo ""
-echo "=== 36. GEMINI.md: Common Pitfalls section exists ==="
+echo "=== 36. STRUCTURAL: Planner phase ordering ==="
+prev_line=0
+all_ordered=true
+for phase in 1 2 3 4 5 6 7; do
+  line=$(rg -n "^## Phase ${phase}:" "$PLAN" | head -1 | cut -d: -f1)
+  if [ -z "$line" ]; then
+    fail "Phase $phase missing from planner"
+    all_ordered=false
+  elif [ "$line" -le "$prev_line" ]; then
+    fail "Phase $phase is out of order"
+    all_ordered=false
+  else
+    prev_line=$line
+  fi
+done
+$all_ordered && pass "Phases 1-7 appear in correct order"
+
+echo ""
+echo "=== 37. GEMINI.md: Common Pitfalls section exists ==="
 check_present "GEMINI.md" "Common Pitfalls" "Common Pitfalls section"
 check_present "GEMINI.md" "pipe.*exit code|exit code.*pipe" "Pipe warning in pitfalls"
 check_present "GEMINI.md" "high/medium/low" "Severity format in pitfalls"
