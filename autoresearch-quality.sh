@@ -523,6 +523,14 @@ else
 fi
 
 echo ""
+echo "=== 52. ORCHESTRATOR: Option C has loop prevention ==="
+if grep -q "Count partials\|partial.*3\|partial.*escalat" "$ORCH" 2>/dev/null; then
+  pass "Option C has partial-completion escalation limit"
+else
+  fail "Option C missing loop prevention — could re-dispatch indefinitely"
+fi
+
+echo ""
 echo "=== SUMMARY ==="
 echo "Errors: $ERRORS"
 echo "Warnings: $WARNINGS"

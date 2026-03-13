@@ -154,6 +154,8 @@ Evaluate the handoff against these options **in order**. Apply the **first** mat
 1. Update the feature's `description`: `[PARTIAL] Completed: <whatWasImplemented>. Remaining: <whatWasLeftUndone>.`
 2. Keep the feature's status as `"pending"` for re-dispatch
 3. Append to `progress_log.jsonl`: `{"timestamp":"...","event":"feature_partial","featureId":"<id>","implemented":"<whatWasImplemented>","remaining":"<whatWasLeftUndone>"}`
+4. **Count partials:** scan `progress_log.jsonl` for `feature_partial` events with this `featureId`. If count reaches 3:
+   - The feature is making progress but never finishing. Treat as **Option B failure** with `whatWasLeftUndone` as the reason. This triggers Option B's retry counter and eventual escalation to the user.
 
 ### Option D — Medium/low-severity issues only
 **Trigger:** `discoveredIssues` contains ONLY `"medium"` or `"low"` severity entries (no `"high"`), AND `whatWasLeftUndone` is empty, AND all `exitCode` values are 0.
