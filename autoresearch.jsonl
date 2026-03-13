@@ -1,1 +1,2 @@
 {"type":"config","name":"Gemini Mission Control shell script performance","metricName":"total_µs","metricUnit":"µs","bestDirection":"lower"}
+{"run":1,"commit":"b9d8aa5","metric":319144,"metrics":{"scaffold_µs":60044,"validate_µs":23649,"session_µs":235451},"status":"keep","description":"Baseline: scaffold=60ms, validate=24ms, session=235ms","timestamp":1773366533806,"segment":0}
