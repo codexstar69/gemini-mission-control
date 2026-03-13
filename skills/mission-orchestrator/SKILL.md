@@ -125,7 +125,7 @@ Evaluate the handoff against these options **in order**. Apply the **first** mat
 4. Follow-up feature fields (ALL required):
    - `id`: `"fix-<original-feature-id>-<issue-index>"` (e.g., `fix-user-auth-001`)
    - `description`: issue description + suggested fix from handoff
-   - `skillName`: same as original (or `code-quality-worker` for quality issues)
+   - `skillName`: same as original (or `code-quality-worker` for quality issues). **Exception:** if the original was a validator (`scrutiny-validator` or `user-testing-validator`), use `code-quality-worker` for the follow-up.
    - `milestone`: same as original (or `misc-*` if milestone is sealed)
    - `preconditions`: `["<original-feature-id>"]`
    - `expectedBehavior`: `["<issue resolution criteria from discoveredIssues>"]`
