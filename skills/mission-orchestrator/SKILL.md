@@ -57,7 +57,7 @@ Select the **first** ready feature in array order. Array position determines pri
 
 ## Step 3: Construct Worker Prompt
 
-Build an enriched prompt for the worker agent containing:
+Build an enriched prompt for the worker agent. Structure the prompt clearly with labeled sections so the worker can find each piece of context:
 
 1. **Feature assignment** — the full feature object: `id`, `description`, `expectedBehavior`, `verificationSteps`, `fulfills`
 2. **Project context** from `<workingDirectory>/.mission/`:
