@@ -105,5 +105,6 @@ These hooks run automatically — you don't need to invoke them:
 | `block-pipe-masking` | BeforeTool (run_shell_command) | **HARD GATE:** Denies commands piped through `\| tail` / `\| head` (masks exit codes) |
 | `protect-sealed-milestones` | BeforeTool (write_file) | Injects sealed milestone reminder on features.json writes |
 | `check-state-drift` | AfterAgent | Detects counter mismatches (completedFeatures/totalFeatures vs actual) on session end |
+| `pre-compress-snapshot` | PreCompress | Logs compression event to progress_log.jsonl, reminds agent to re-read state from disk |
 
 **Hard gates** (`block-pipe-masking`) deny the tool call and return an error to the agent. **Validators** (`validate-state-write`, `validate-features-write`) allow the write but inject warnings. **Advisory** hooks (`check-state-drift`, `protect-sealed-milestones`) add context without blocking.

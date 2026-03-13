@@ -414,7 +414,7 @@ fi
 
 echo ""
 echo "=== 40. HOOKS: All hook scripts exist and are executable ==="
-for hook_script in hooks/validate-state-write.sh hooks/block-pipe-masking.sh hooks/protect-sealed-milestones.sh hooks/check-state-drift.sh hooks/validate-features-write.sh; do
+for hook_script in hooks/validate-state-write.sh hooks/block-pipe-masking.sh hooks/protect-sealed-milestones.sh hooks/check-state-drift.sh hooks/validate-features-write.sh hooks/pre-compress-snapshot.sh; do
   if [ -x "$hook_script" ]; then
     pass "$(basename $hook_script) exists and is executable"
   else
@@ -425,7 +425,7 @@ done
 echo ""
 echo "=== 41. HOOKS: Hook scripts handle JSON I/O correctly ==="
 # Each hook must output valid JSON for the "allow" case
-for hook_script in hooks/validate-state-write.sh hooks/block-pipe-masking.sh hooks/protect-sealed-milestones.sh hooks/check-state-drift.sh hooks/validate-features-write.sh; do
+for hook_script in hooks/validate-state-write.sh hooks/block-pipe-masking.sh hooks/protect-sealed-milestones.sh hooks/check-state-drift.sh hooks/validate-features-write.sh hooks/pre-compress-snapshot.sh; do
   output=$(echo '{"tool_name":"test","tool_input":{}}' | bash "$hook_script" 2>/dev/null)
   if echo "$output" | python3 -c "import json,sys; json.load(sys.stdin)" 2>/dev/null; then
     pass "$(basename $hook_script) outputs valid JSON"

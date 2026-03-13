@@ -74,6 +74,20 @@
           }
         ]
       }
+    ],
+    "PreCompress": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "pre-compress-snapshot",
+            "type": "command",
+            "command": "${extensionPath}/hooks/pre-compress-snapshot.sh",
+            "timeout": 3000,
+            "description": "Logs compression event and reminds agent to re-read state from disk"
+          }
+        ]
+      }
     ]
   }
 }
