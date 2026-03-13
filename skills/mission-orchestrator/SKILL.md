@@ -315,19 +315,20 @@ Evaluate the handoff in this order:
 **Action:**
 1. Create a new follow-up feature for each high-severity issue (or group related issues into one feature).
 2. Insert the new feature(s) at the **top** of the `features` array in `features.json` (highest priority).
-3. Set the follow-up feature's fields:
+3. **Sealed milestone check:** Before assigning the follow-up feature to the original feature's milestone, check if that milestone is in `sealedMilestones`. If it IS sealed, assign the follow-up to a `misc-*` milestone instead (see Misc Milestones section for capacity rules). Never add features to a sealed milestone.
+4. Set the follow-up feature's fields:
    - `id`: `"fix-<original-feature-id>-<issue-index>"` (e.g., `fix-user-auth-001`)
    - `description`: The issue description + suggested fix from the handoff
    - `skillName`: Same as the original feature (or `code-quality-worker` for quality issues)
-   - `milestone`: Same milestone as the original feature
+   - `milestone`: Same milestone as the original feature (or `misc-*` if the milestone is sealed)
    - `preconditions`: `[<original-feature-id>]` (depends on the original being done)
    - `expectedBehavior`: Derived from the issue description
    - `verificationSteps`: Derived from the suggested fix
    - `fulfills`: `[]` (follow-ups typically don't fulfill new assertions)
    - `status`: `"pending"`
-4. Mark the original feature as `"completed"` (it did its work; the follow-up addresses remaining issues).
-5. Increment `completedFeatures` in `state.json`.
-6. Update `totalFeatures` to reflect the newly added feature(s).
+5. Mark the original feature as `"completed"` (it did its work; the follow-up addresses remaining issues).
+6. Increment `completedFeatures` in `state.json`.
+7. Update `totalFeatures` to reflect the newly added feature(s).
 
 ### Option B: Reset to Pending on Failure
 
@@ -372,6 +373,7 @@ Evaluate the handoff in this order:
 1. Mark the original feature as `"completed"` in `features.json`.
 2. Increment `completedFeatures` in `state.json`.
 3. For each `medium` or `low` severity issue, create a new feature in a `misc-*` milestone:
+   - **Never add to a sealed milestone.** Misc features always go to `misc-*` milestones, which by definition are never sealed until their own validators pass.
    - Find the current misc milestone (`misc-1`, `misc-2`, etc.).
    - If the current misc milestone has 5 features already, create the next one (`misc-2`, `misc-3`, etc.).
    - Set the new feature's fields:
@@ -536,7 +538,28 @@ If all implementation features in the milestone are done AND the milestone is NO
 After a `user-testing-validator-<milestone>` feature completes successfully (clean success or Option D):
 
 1. Add the milestone to `sealedMilestones` in `state.json`.
-2. From this point forward, reject any attempt to add features to this milestone. New work goes to a follow-up milestone or `misc-*` milestone instead.
+2. Log the sealing event:
+   ```json
+   {"timestamp": "<ISO 8601>", "event": "milestone_sealed", "milestone": "<milestone>"}
+   ```
+3. Write a `validation_result` message to `messages.jsonl`:
+   ```json
+   {"timestamp": "<ISO 8601>", "sender": "orchestrator", "type": "validation_result", "content": "Milestone '<milestone>' sealed after both validators passed."}
+   ```
+
+#### Sealed Milestone Enforcement
+
+From this point forward, **no new features may be added to a sealed milestone**. This rule is enforced in the following locations:
+
+1. **Decision Tree — Option A (follow-ups):** Before assigning a follow-up feature to the original feature's milestone, check `sealedMilestones`. If the milestone is sealed, redirect the follow-up to a `misc-*` milestone instead.
+
+2. **Decision Tree — Option D (misc features):** Misc features always go to `misc-*` milestones, which are never sealed until their own validators pass.
+
+3. **Scope Change — Adding Requirements:** When a user requests a new feature targeting a specific milestone, check `sealedMilestones`. If sealed, direct the feature to a `misc-*` milestone or a new follow-up milestone. Never unseal a milestone.
+
+4. **General addFeature guard:** Whenever adding ANY new feature to `features.json` (whether from the decision tree, scope change, or any other source), check if the target milestone is in `sealedMilestones`. If it is, reject the assignment and redirect to `misc-*`:
+   - Log a warning: `{"timestamp": "<ISO 8601>", "event": "sealed_milestone_rejected", "milestone": "<milestone>", "featureId": "<id>", "redirectedTo": "misc-N"}`
+   - Inform the user if relevant: "Cannot add feature to sealed milestone '<milestone>'. Redirecting to misc-N."
 
 ### 8.4 Check for Mission Completion
 
@@ -765,3 +788,69 @@ Each line in `messages.jsonl` is a JSON object:
 - **Error:** Write an `error_report` message when a deadlock, escalation, or crash recovery occurs.
 
 Workers may also write messages to `messages.jsonl` to communicate findings or requests to the orchestrator and future workers.
+
+---
+
+## Validation Override Protocol
+
+The orchestrator supports overriding failed validators when the user invokes `/mission-override` with a documented justification. This is an escape hatch for cases where validation failures are acceptable (e.g., known limitations, deferred fixes, environment-specific issues).
+
+### When Override Applies
+
+Override is used when:
+- A `scrutiny-validator-<milestone>` or `user-testing-validator-<milestone>` feature has failed (handoff reported failure, or the feature is stuck in `pending` after a failed attempt).
+- The user explicitly invokes `/mission-override "<justification>"` with a non-empty justification string.
+
+### Override Procedure
+
+When `/mission-override` is invoked:
+
+1. **Validate justification:** If the justification argument is empty, reject the override and prompt the user to provide a reason.
+
+2. **Identify failed validators:** Scan `features.json` for features whose `id` matches `scrutiny-validator-*` or `user-testing-validator-*` and whose status is `pending` (indicating a failed or blocked validation attempt). Also check handoff files in `handoffs/` for validator features that reported failure.
+
+3. **Mark validators as completed:** For each failed validator feature found:
+   - Set its `status` to `"completed"` in `features.json`.
+   - Increment `completedFeatures` in `state.json`.
+
+4. **Record justification in synthesis report:** For each overridden validator:
+   - Read the existing synthesis report at `.mission/validation/<milestone>/<validator-type>/synthesis.json` (where `<validator-type>` is `scrutiny` or `user-testing`).
+   - Update or create the synthesis report to include override information:
+     ```json
+     {
+       "overridden": true,
+       "overriddenAt": "<ISO 8601 timestamp>",
+       "justification": "<user's justification string>",
+       "originalStatus": "<previous status if available, e.g., failed>",
+       "originalFindings": "<previous findings summary if available>"
+     }
+     ```
+   - Write the updated report back using `write_file`.
+
+5. **Seal the milestone:** After both validators for a milestone are marked completed (whether by override or by passing), add the milestone to `sealedMilestones` in `state.json`. The override counts as "validators passed" for sealing purposes.
+
+6. **Log the override event:** Append to `progress_log.jsonl`:
+   ```json
+   {"timestamp": "<ISO 8601>", "event": "validation_overridden", "milestone": "<milestone>", "justification": "<justification>", "features": ["scrutiny-validator-<milestone>", "user-testing-validator-<milestone>"]}
+   ```
+
+7. **Write inter-agent message:** Append to `messages.jsonl`:
+   ```json
+   {"timestamp": "<ISO 8601>", "sender": "orchestrator", "type": "validation_result", "content": "Validation for milestone '<milestone>' overridden with justification: <justification>"}
+   ```
+
+8. **Update state.json:** Set `updatedAt` to current ISO 8601 timestamp. If the mission was in `paused` state due to validation failure, transition back to `orchestrator_turn`.
+
+9. **Confirm to user:** Display:
+   - Mission ID
+   - Overridden validator feature IDs
+   - Justification recorded
+   - Message: "Validation override applied. The justification has been recorded in the synthesis report. You may now continue with `/mission-run`."
+
+### Override Rules
+
+- Override requires a non-empty justification. Silent overrides are not allowed.
+- The justification is permanently recorded in the synthesis report for audit purposes.
+- Overriding a validator has the same effect as the validator passing — the milestone is sealed afterward.
+- Override does NOT change `validation-state.json` assertion statuses. Failed assertions remain `failed`; the override only affects the validator feature status and milestone sealing.
+- If only one of the two validators for a milestone needs overriding (e.g., scrutiny passed but user-testing failed), only the failed one is overridden.
