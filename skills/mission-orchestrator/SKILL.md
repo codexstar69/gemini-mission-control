@@ -224,7 +224,7 @@ If all implementation features in the milestone are done AND the milestone is NO
 - Append to `progress_log.jsonl`: `{"event":"milestone_completed","milestone":"<name>"}` and `{"event":"validation_injected","milestone":"<name>","validators":["scrutiny-validator-<ms>","user-testing-validator-<ms>"]}`
 
 ### 8.3 Seal milestones
-After `user-testing-validator-<milestone>` completes with a successful handoff (clean success or only non-blocking issues):
+After `user-testing-validator-<milestone>` completes with a successful handoff (Clean Success or Option D — no high-severity issues):
 - Add the milestone to `sealedMilestones` array in `state.json`
 - Append to `progress_log.jsonl`: `{"event":"milestone_sealed","milestone":"<name>"}`
 - Append to `messages.jsonl`: `{"sender":"orchestrator","type":"validation_result","content":"Milestone <name> validation passed and sealed"}`
