@@ -69,17 +69,10 @@ Write to `.mission/validation/<milestone>/scrutiny/synthesis.json` (create direc
   "status": "passed|failed",
   "hardGate": {
     "passed": true,
-    "commands": [
-      {"name": "test", "command": "...", "exitCode": 0, "observation": "..."}
-    ]
+    "commands": [{"name": "test", "command": "...", "exitCode": 0, "observation": "..."}]
   },
-  "reviewScope": {
-    "mode": "full|revalidation",
-    "completedFeaturesReviewed": ["feature-id-1", "feature-id-2"]
-  },
-  "findings": [
-    {"severity": "high|medium|low", "featureId": "...", "summary": "...", "evidence": ["..."]}
-  ],
+  "reviewScope": {"mode": "full|revalidation", "completedFeaturesReviewed": ["feature-id-1"]},
+  "findings": [{"severity": "high|medium|low", "featureId": "...", "summary": "...", "evidence": ["..."]}],
   "summary": "Overall assessment",
   "nextAction": "pass|fix"
 }

@@ -71,13 +71,8 @@ Write to `.mission/validation/<milestone>/user-testing/synthesis.json` (create d
   "milestone": "<name>",
   "validator": "user-testing",
   "status": "passed|failed|blocked",
-  "scope": {
-    "assertionIds": ["VAL-XXX-001", "VAL-XXX-002"],
-    "retestedFailuresOnly": false
-  },
-  "results": [
-    {"assertionId": "VAL-XXX-001", "status": "passed", "evidence": ["..."], "notes": "..."}
-  ],
+  "scope": {"assertionIds": ["VAL-XXX-001", "VAL-XXX-002"], "retestedFailuresOnly": false},
+  "results": [{"assertionId": "VAL-XXX-001", "status": "passed", "evidence": ["..."], "notes": "..."}],
   "summary": "Overall assessment",
   "nextAction": "pass|fix"
 }
