@@ -184,7 +184,13 @@ Map every VAL ID from the contract to `{"status":"pending"}`:
 
 ### 7.4 `AGENTS.md`
 Write to `~/.gemini-mc/missions/mis_<id>/AGENTS.md`.
-Include: working directory path, mission boundaries (off-limits files/dirs), known pre-existing issues, coding conventions, verification commands reference.
+
+This file is read by every worker agent at startup. Include:
+- **Working directory:** the absolute path to the project
+- **Mission boundaries:** files/directories workers must NOT modify, external services they must NOT access
+- **Known pre-existing issues:** failures that existed before the mission started (so workers don't try to fix them)
+- **Coding conventions:** language style, naming conventions, import ordering, test naming patterns observed in Phase 2
+- **Verification commands:** quick reference to test/lint/typecheck commands from services.yaml
 
 ### 7.5 `mission.md`
 Update `~/.gemini-mc/missions/mis_<id>/mission.md` with: original description, refined requirements, confirmed milestone plan, architecture decisions, testing strategy.
