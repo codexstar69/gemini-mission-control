@@ -53,13 +53,49 @@ if echo "$modified" | grep -qE '\bcomposer (install|update|require)\b' && ! echo
   changed=true
 fi
 
+# pip install without --no-input → add --no-input
+if echo "$modified" | grep -qE '\bpip3? install\b' && ! echo "$modified" | grep -qE '\-\-no-input\b'; then
+  modified=$(echo "$modified" | sd '(pip3?) install' '$1 install --no-input')
+  changed=true
+fi
+
+# ─── CATEGORY 2: System package managers ───
+
+# apt-get install without -y
+if echo "$modified" | grep -qE '\bapt-get install\b' && ! echo "$modified" | grep -qE '\-y\b|\-\-yes\b'; then
+  modified=$(echo "$modified" | sd 'apt-get install' 'apt-get install -y')
+  changed=true
+fi
+
+# apt install without -y
+if echo "$modified" | grep -qE '\bapt install\b' && ! echo "$modified" | grep -qE '\-y\b|\-\-yes\b'; then
+  modified=$(echo "$modified" | sd 'apt install' 'apt install -y')
+  changed=true
+fi
+
+# yum install without -y
+if echo "$modified" | grep -qE '\byum install\b' && ! echo "$modified" | grep -qE '\-y\b|\-\-yes\b'; then
+  modified=$(echo "$modified" | sd 'yum install' 'yum install -y')
+  changed=true
+fi
+
+# dnf install without -y
+if echo "$modified" | grep -qE '\bdnf install\b' && ! echo "$modified" | grep -qE '\-y\b|\-\-yes\b'; then
+  modified=$(echo "$modified" | sd 'dnf install' 'dnf install -y')
+  changed=true
+fi
+
+# pacman -S without --noconfirm
+if echo "$modified" | grep -qE '\bpacman -S\b' && ! echo "$modified" | grep -qE '\-\-noconfirm\b'; then
+  modified=$(echo "$modified" | sd 'pacman -S' 'pacman -S --noconfirm')
+  changed=true
+fi
+
 # ─── CATEGORY 3: Docker foreground blocking ───
 
-# docker run without -d → add -d (prevents foreground hang)
-# But skip if command already has -d, --detach, -it, --rm (short-lived)
+# docker run without -d → add -d for known long-running service images
 if echo "$modified" | grep -qE '\bdocker run\b' && ! echo "$modified" | grep -qE '\-d\b|\-\-detach\b'; then
-  # Only add -d for long-running containers (those with service images like postgres, redis, mysql, mongo, etc.)
-  if echo "$modified" | grep -qE 'postgres|redis|mysql|mongo|rabbitmq|elasticsearch|kafka|nginx|httpd|memcached|mariadb|minio'; then
+  if echo "$modified" | grep -qE 'postgres|redis|mysql|mongo|rabbitmq|elasticsearch|kafka|nginx|httpd|memcached|mariadb|minio|supabase|nats|zookeeper|consul|vault|grafana|prometheus|influxdb|clickhouse'; then
     modified=$(echo "$modified" | sd 'docker run ' 'docker run -d ')
     changed=true
   fi
@@ -77,7 +113,7 @@ if echo "$modified" | grep -qE '\bdocker exec\s+\-it\b|\bdocker exec\s+\-ti\b'; 
   changed=true
 fi
 
-# ─── CATEGORY 4: Git editor prompts ───
+# ─── CATEGORY 4: Git editor/credential prompts ───
 
 # git commit without -m → prevent editor opening
 if echo "$modified" | grep -qE '\bgit commit\b' && ! echo "$modified" | grep -qE '\-m\b|\-\-message\b|\-\-allow-empty-message\b|\-\-amend\b'; then
@@ -89,6 +125,45 @@ fi
 if echo "$modified" | grep -qE '\bgit (clone|push|pull|fetch)\b' && ! echo "$modified" | grep -qE 'GIT_TERMINAL_PROMPT'; then
   modified="GIT_TERMINAL_PROMPT=0 $modified"
   changed=true
+fi
+
+# ─── CATEGORY 5: Interactive shells and REPLs (BLOCK) ───
+
+# mysql/psql/mongo without -c/-e/--command → opens interactive shell
+if echo "$modified" | grep -qE '^\s*(mysql|psql|mongosh?)\s*$' || \
+   echo "$modified" | grep -qE '^\s*(mysql|psql|mongosh?)\s+[^-]' && \
+   ! echo "$modified" | grep -qE '\-c\b|\-e\b|\-\-command\b|\-f\b|\-\-file\b'; then
+  # Can't auto-fix — need a query. Warn but allow.
+  :
+fi
+
+# python/node/ruby without args → opens REPL (BLOCK)
+if echo "$modified" | grep -qE '^\s*(python3?|node|ruby|irb|lua)\s*$'; then
+  cat <<EOF
+{
+  "decision": "deny",
+  "reason": "BLOCKED: '${modified}' opens an interactive REPL. Workers cannot interact with REPLs. Use 'python3 -c \"...\"' or 'node -e \"...\"' for one-liner execution, or 'python3 script.py' / 'node script.js' for file execution."
+}
+EOF
+  exit 0
+fi
+
+# ssh-keygen without -N → prompts for passphrase
+if echo "$modified" | grep -qE '\bssh-keygen\b' && ! echo "$modified" | grep -qE '\-N\b'; then
+  modified=$(echo "$modified" | sd 'ssh-keygen' 'ssh-keygen -N ""')
+  changed=true
+fi
+
+# ─── CATEGORY 6: TUI/pager programs (BLOCK) ───
+
+if echo "$modified" | grep -qE '^\s*(less|more|vi|vim|nvim|nano|emacs|top|htop|man)\b'; then
+  cat <<EOF
+{
+  "decision": "deny",
+  "reason": "BLOCKED: '$(echo "$modified" | sd '"' '\\"')' opens an interactive TUI. Workers cannot interact with TUIs. Use 'cat' to view files, or pipe output to a file instead."
+}
+EOF
+  exit 0
 fi
 
 # ─── Output ───
