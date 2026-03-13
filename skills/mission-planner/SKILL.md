@@ -70,7 +70,7 @@ Before proceeding, verify the precondition graph has no cycles using topological
 4. If the number of processed features equals total features → graph is acyclic ✓
 5. If not → cycle detected → restructure: merge tightly coupled features, remove soft dependencies, or reorder milestones
 
-**Never proceed to Phase 4 with cyclic dependencies.**
+**Never proceed to Phase 4 with cyclic dependencies.** Also avoid long dependency chains (>5 deep) which block parallelism and increase risk of partial-completion cascades.
 
 **Output to present:** Milestone/feature list with preconditions and DAG verification result.
 
