@@ -52,7 +52,7 @@ Select the **first** ready feature in array order. Array position determines pri
 
 **No ready features found:**
 - If no features have status `"pending"` at all → proceed directly to Step 8 (check mission completion)
-- If pending features exist but none are ready (all blocked by unfinished preconditions) → this is a **deadlock**. Append `{"event":"deadlock_detected",...}` to progress log, set state to `"paused"`, inform the user which features are blocked and what they're waiting on
+- If pending features exist but none are ready (all blocked by unfinished preconditions) → this is a **deadlock**. Append `{"timestamp":"<ISO>","event":"deadlock_detected","blockedFeatures":["<id>",...],"waitingOn":["<id>",...]}` to progress log, set state to `"paused"`, inform the user which features are blocked and what they're waiting on
 
 ---
 
