@@ -85,6 +85,12 @@ Project enrichment: `<project>/.mission/` — services.yaml, init.sh, library/, 
 2. Both validators pass → milestone added to `sealedMilestones` (immutable — no new features)
 3. If validation fails → `/mission-override` with justification, or create fix features and re-run
 
+## Common Pitfalls
+- **Piping masks exit codes.** Workers must NEVER pipe through `| tail` or `| head`. Direct execution only.
+- **Severity must be `high/medium/low`** — never `blocking/non_blocking`. Decision tree depends on this format.
+- **Sealed milestones are immutable.** Follow-up features targeting sealed milestones go to `misc-*` instead.
+- **Cancelled features satisfy preconditions.** DAG evaluation treats cancelled as "done."
+
 ## Cross-Session Persistence
 
 All state written to disk immediately. SessionStart hook (`scripts/session-context.sh`) auto-loads active mission context on every session start. Crash recovery in orchestrator Step 1 handles interrupted `worker_running` state.
