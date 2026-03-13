@@ -83,6 +83,7 @@ Build an enriched prompt for the worker agent. Structure the prompt clearly with
 2. Append to `progress_log.jsonl`: `{"timestamp":"<ISO 8601>","event":"worker_started","featureId":"<id>","agentName":"<agent>","skillName":"<skill>"}`
 3. Dispatch the worker subagent with the enriched prompt from Step 3
 4. Wait for the worker to complete and return its response
+5. **If the worker times out or returns no response:** treat as a malformed handoff (→ Option B failure in Step 6). The crash recovery mechanism in Step 1 also handles this if the orchestrator itself is interrupted.
 
 ---
 
